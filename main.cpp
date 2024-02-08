@@ -2,6 +2,8 @@
 // 40212358011
 
 #include <iostream>
+#include <fstream>
+
 using namespace std;
 
 // struct for saving game data
@@ -44,8 +46,9 @@ struct Banshee
     int count;
 };
 
-// main enemy struct for saving all enemies information 
-struct Enemy {
+// main enemy struct for saving all enemies information
+struct Enemy
+{
     Dart dart;
     Striker striker;
     Wraith wraith;
@@ -54,6 +57,8 @@ struct Enemy {
 
 // main menu
 void mainMenu(int);
+// function to save game in file
+void gameSaver();
 // TODO : struct for saving spaceship types details if needed
 // TODO : function to draw the map
 // TODO : function to move the spaceship
@@ -73,15 +78,44 @@ int main()
 void mainMenu(int input)
 {
     cout << "choose what you want to do" << endl
-         << "1 - start new game"         << endl
-         << "2 - resume game"            << endl
+         << "1 - start new game" << endl
+         << "2 - resume game" << endl
          << "3 - change game difficulty" << endl
-         << "4 - change winning score"   << endl ;
+         << "4 - change winning score" << endl;
 
-    
     if (input == 1)
     {
         // restart game
     }
 }
 
+void gameSaver()
+{
+    Enemy enemy;
+    ofstream enemyInfo("enemy.txt");
+    if (enemyInfo.is_open())
+    {
+        // save all struct info in file
+        enemyInfo << "Dart: "
+                  << "size = " << enemy.dart.size
+                  << ", heal = " << enemy.dart.heal
+                  << ", count = " << enemy.dart.count << endl;
+        enemyInfo << "Striker: "
+                  << "size = " << enemy.striker.size
+                  << ", heal = " << enemy.striker.heal
+                  << ", count = " << enemy.striker.count << endl;
+        enemyInfo << "Wraith: "
+                  << "size = " << enemy.wraith.size
+                  << ", heal = " << enemy.wraith.heal
+                  << ", count = " << enemy.wraith.count << endl;
+        enemyInfo << "Banshee: "
+                  << "size = " << enemy.banshee.size
+                  << ", heal = " << enemy.banshee.heal
+                  << ", count = " << enemy.banshee.count << endl;
+        enemyInfo.close();
+    }
+    else
+    {
+        cerr << "error opening enemy.txt";
+    }
+}
