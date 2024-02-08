@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 using namespace std;
 
@@ -15,49 +16,20 @@ struct GameData
     int heal = 3;
 };
 
-// struct for defining enemy type details
-// enemy size in map will be size*size
-
-struct Dart
-{
-    int size = 1;
-    int heal = 1;
-    int count;
-};
-
-struct Striker
-{
-    int size = 2;
-    int heal = 2;
-    int count;
-};
-
-struct Wraith
-{
-    int size = 3;
-    int heal = 4;
-    int count;
-};
-
-struct Banshee
-{
-    int size = 4;
-    int heal = 6;
-    int count;
-};
-
-// main enemy struct for saving all enemies information
+// struct for saving enemy details
 struct Enemy
 {
-    Dart dart;
-    Striker striker;
-    Wraith wraith;
-    Banshee banshee;
+    string type;
+    int size;
+    int heal;
+    int count;
+    // Add position here
 };
 
 // main menu
 void mainMenu(int);
-// function to save game in file
+// function to save enemies data in file
+void saveEnemies(const vector<Enemy> &enemies);
 void gameSaver();
 // TODO : struct for saving spaceship types details if needed
 // TODO : function to draw the map
@@ -89,33 +61,20 @@ void mainMenu(int input)
     }
 }
 
-void gameSaver()
+void saveEnemies(const vector<Enemy> &enemies)
 {
-    Enemy enemy;
     ofstream enemyInfo("enemy.txt");
-    if (enemyInfo.is_open())
-    {
-        // save all struct info in file
-        enemyInfo << "Dart: "
-                  << "size = " << enemy.dart.size
-                  << ", heal = " << enemy.dart.heal
-                  << ", count = " << enemy.dart.count << endl;
-        enemyInfo << "Striker: "
-                  << "size = " << enemy.striker.size
-                  << ", heal = " << enemy.striker.heal
-                  << ", count = " << enemy.striker.count << endl;
-        enemyInfo << "Wraith: "
-                  << "size = " << enemy.wraith.size
-                  << ", heal = " << enemy.wraith.heal
-                  << ", count = " << enemy.wraith.count << endl;
-        enemyInfo << "Banshee: "
-                  << "size = " << enemy.banshee.size
-                  << ", heal = " << enemy.banshee.heal
-                  << ", count = " << enemy.banshee.count << endl;
+    if (enemyInfo.is_open()) {
+        // iterate over vector of enemies and save them into file
+        for (const auto& enemy : enemies) {
+            enemyInfo << enemy.type << ": size = " << enemy.size << ", heal = " << enemy.heal << ", count = " << enemy.count << endl;
+        }
         enemyInfo.close();
+    } else {
+        cerr << "Error opening enemy.txt" << endl;
     }
-    else
-    {
-        cerr << "error opening enemy.txt";
-    }
+}
+
+void gameSaver(){
+    // save saveEnemies and other info
 }
