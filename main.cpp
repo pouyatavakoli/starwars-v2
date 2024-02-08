@@ -39,6 +39,9 @@ struct Banshee
     int size = 4;
     int heal = 6;
 };
+
+// main menu
+void mainMenu(int);
 // TODO : struct for saving spaceship types details if needed
 // TODO : function to draw the map
 // TODO : function to move the spaceship
@@ -53,3 +56,20 @@ int main()
 {
     return 0;
 }
+
+// TODO : make specific menu for each situation or change menu options according to situation
+void mainMenu(int input)
+{
+    cout << "choose what you want to do" << endl
+         << "1 - start new game"         << endl
+         << "2 - resume game"            << endl
+         << "3 - change game difficulty" << endl
+         << "4 - change winning score"   << endl ;
+
+    
+    if (input == 1)
+    {
+        // restart game
+    }
+}
+
