@@ -20,24 +20,36 @@ struct Dart
 {
     int size = 1;
     int heal = 1;
+    int count;
 };
 
 struct Striker
 {
     int size = 2;
     int heal = 2;
+    int count;
 };
 
 struct Wraith
 {
     int size = 3;
     int heal = 4;
+    int count;
 };
 
 struct Banshee
 {
     int size = 4;
     int heal = 6;
+    int count;
+};
+
+// main enemy struct for saving all enemies information 
+struct Enemy {
+    Dart dart;
+    Striker striker;
+    Wraith wraith;
+    Banshee banshee;
 };
 
 // main menu
