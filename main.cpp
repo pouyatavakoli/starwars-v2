@@ -30,7 +30,7 @@ struct Enemy
 void mainMenu(int);
 // function to save enemies data in file
 void saveEnemies(const vector<Enemy> &enemies);
-void gameSaver();
+void gameSaver(const vector<Enemy> &enemies);
 // TODO : struct for saving spaceship types details if needed
 // TODO : function to draw the map
 // TODO : function to move the spaceship
@@ -46,35 +46,54 @@ int main()
     return 0;
 }
 
-// TODO : make specific menu for each situation or change menu options according to situation
-void mainMenu(int input)
+// menu that can be different in each situation
+void mainMenu(int situation)
 {
-    cout << "choose what you want to do" << endl
-         << "1 - start new game" << endl
-         << "2 - resume game" << endl
-         << "3 - change game difficulty" << endl
-         << "4 - change winning score" << endl;
+    cout << "Choose what you want to do" << endl;
 
-    if (input == 1)
+    switch (situation)
     {
-        // restart game
+    case 1:
+        // Start new game menu
+        cout << "1 - start new game" << endl
+             << "2 - change game mode" << endl;
+        break;
+    case 2:
+        // Resume game menu
+        cout << "1 - resume game" << endl
+             << "2 - save game" << endl;
+        break;
+    case 3:
+        // Change game settings menu
+        cout << "1 - change game difficulty" << endl
+             << "2 - change winning score" << endl;
+        break;
+    default:
+        cout << "Invalid situation" << endl;
+        break;
     }
 }
 
 void saveEnemies(const vector<Enemy> &enemies)
 {
     ofstream enemyInfo("enemy.txt");
-    if (enemyInfo.is_open()) {
+    if (enemyInfo.is_open())
+    {
         // iterate over vector of enemies and save them into file
-        for (const auto& enemy : enemies) {
+        for (const auto &enemy : enemies)
+        {
             enemyInfo << enemy.type << ": size = " << enemy.size << ", heal = " << enemy.heal << ", count = " << enemy.count << endl;
         }
         enemyInfo.close();
-    } else {
+    }
+    else
+    {
         cerr << "Error opening enemy.txt" << endl;
     }
 }
 
-void gameSaver(){
-    // save saveEnemies and other info
+void gameSaver(const vector<Enemy> &enemies)
+{
+    saveEnemies(enemies);
+    // save other game info
 }
