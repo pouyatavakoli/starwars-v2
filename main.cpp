@@ -1,51 +1,93 @@
-// Pouya Tavakoli
-// 40212358011
+// Pouya Tavakoli  40212358011
+// Pouya Omidi     40212358002
 
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <time.h>
 
 using namespace std;
 
 // struct for saving game data
 struct GameData
 {
-    int ship_x;
-    // ship is always in the lowest row so  y = 0
-    int score = 0;
+    int level = 1;
+    int point = 0;
     int heal = 3;
 };
 
 // struct for saving enemy details
-struct Enemy
+struct Dart
 {
-    string type;
-    int size;
-    int heal;
-    int count;
+    int size = 1 * 1;
+    int heal = 1;
+    int count = 0;
+    int D_coordinate[1][2];
     // Add color here
     // Add position here
 };
+
+struct Striker
+{
+    int size = 2 * 2;
+    int heal = 2;
+    int count = 0;
+    int S_coordinate[4][2];
+    // Add color here
+    // Add position here
+};
+
+struct Wraith
+{
+    int size = 3 * 3;
+    int heal = 4;
+    int count = 0;
+    int W_coordinate[9][2];
+    // Add color here
+    // Add position here
+};
+
+struct Banshee
+{
+    int size = 4 * 4;
+    int heal = 6;
+    int count = 0;
+    int B_coordinate[16][4];
+    // Add color here
+    // Add position here
+};
+
 // struct for saving spaceship types details
 struct SpaceShip
 {
     // The shape can be any character, or even the first letter of a player's name
+    int ship_y;
     char shape = '@';
     int power;
     // other details
 };
+
+struct Bullet
+{
+    int coordinate[1][2];
+};
+
 // main menu
 void mainMenu(int);
 // function to save enemies data in file
-void saveEnemies(const vector<Enemy> &enemies);
+void saveEnemies();
+//checking enemy coordinates.
+void coordinates(const int n , vector<Dart> &dart, vector<Striker> &striker,
+                     vector<Wraith> &wraith, vector<Banshee> &banshee);
 // function to save all game data
-void gameSaver(const vector<Enemy> &enemies);
+void gameSaver();
 // function to initialize the game
 void initializeGame();
 // function to end the game
 void endGame();
 // function to draw the map
-void printMap(const int n, const GameData &gameData, const Enemy &enemy, const SpaceShip &spaceShip);
+void printMap(int n, SpaceShip &spaceship, vector<Dart> &dart, vector<Striker> &striker,
+              vector<Wraith> &wraith, vector<Banshee> &banshee, vector<Bullet> &bullets);
 // TODO : function to move the spaceship
 // TODO : function to shoot
 // TODO : scoring system
@@ -54,7 +96,31 @@ void printMap(const int n, const GameData &gameData, const Enemy &enemy, const S
 // TODO : win / lose logic
 
 int main()
-{
+{   
+    int n ;
+    SpaceShip spaceship;
+    vector <Bullet> bullets;
+    vector <Dart> dart;
+    vector <Striker> striker;
+    vector <Wraith> wraith;
+    vector <Banshee> banshee;
+    GameData gamedata;
+    
+
+    cout << "n : ";
+    cin >> n;
+
+    if(n % 2 == 0)
+
+        spaceship.ship_y = n / 2;
+    
+    else 
+
+        spaceship.ship_y = (n - 1) / 2;
+
+    coordinates(n ,dart, striker, wraith, banshee);
+    printMap(n, spaceship, dart, striker, wraith, banshee, bullets);
+
     return 0;
 }
 
@@ -67,13 +133,15 @@ void mainMenu(int situation)
     {
     case 1:
         // Start new game menu
-        cout << "1 - start new game" << endl
-             << "2 - change game mode" << endl;
+        cout << "1 - start new game"   << endl
+             << "2 - change game mode" << endl
+             << "3 - quit game"        << endl;
         break;
     case 2:
         // Resume game menu
         cout << "1 - resume game" << endl
-             << "2 - save game" << endl;
+             << "2 - save game"   << endl
+             << "3 - quit game"   << endl;
         break;
     case 3:
         // Change game settings menu
@@ -86,42 +154,10 @@ void mainMenu(int situation)
     }
 }
 
-void saveEnemies(const vector<Enemy> &enemies)
-{
-    ofstream enemyInfo("enemy.txt");
-    if (enemyInfo.is_open())
-    {
-        // iterate over vector of enemies and save them into file
-        for (const auto &enemy : enemies)
-        {
-            enemyInfo << enemy.type << ": size = " << enemy.size << ", heal = " << enemy.heal << ", count = " << enemy.count << endl;
-        }
-        enemyInfo.close();
-    }
-    else
-    {
-        cerr << "Error opening enemy.txt" << endl;
-    }
-}
 
-void gameSaver(const vector<Enemy> &enemies)
-{
-    saveEnemies(enemies);
-    // save other game info
-}
 
-void initializeGame()
-{
-    // creates files game needs to operate
-    ofstream file("enemy.txt");
-    // File is automatically closed when file goes out of scope
-}
-void endGame()
-{
-    // delete all files
-}
-
-void printMap(const int n, const GameData &gameData, const Enemy &enemy, const SpaceShip &spaceShip)
+void printMap(int n,SpaceShip &spaceship, vector<Dart>& dart, vector<Striker>& striker,
+                 vector<Wraith>& wraith, vector<Banshee>& banshee ,vector<Bullet> &bullets)
 {
      for (int i = 0; i <= n; i++)
     {
@@ -130,25 +166,72 @@ void printMap(const int n, const GameData &gameData, const Enemy &enemy, const S
 
         cout << endl;
 
-        if (i <= 9)
+        if (i <= n-1)
         {
-            for (int k = 0; k <= 10; k++)
+            for (int k = 0; k <= n; k++)
             {
-                bool isStar = false;
+                
                 bool isSpaceShip = false;
-                // Check if the current position is a star or a spaceship
-                for (int l = 0; l < 10; l++)
+                bool isEnemy     = false;
+                bool isBullet    = false;
+                for (int s = 0 ; s < n-1 ; s++ )
                 {
-                 //TODO : enemy check and print  
-                    if (i == gameData.ship_x  && k ==  n)
-                    {
+                    if(i == n-1 && k == spaceship.ship_y)
                         isSpaceShip = true;
-                        break;
+                }
+
+                for (const auto &enemy : dart)
+                {
+                    if (i == enemy.D_coordinate[0][0] && k == enemy.D_coordinate[0][1])
+                        isEnemy = true;
+                }
+
+                for (const auto &enemy : striker)
+                {
+                    for (int s = 0; s < 4; s++)
+                    {
+                        if (i == enemy.S_coordinate[s][0] && k == enemy.S_coordinate[s][1])
+                            isEnemy = true;
                     }
                 }
+
+                for (const auto &enemy : wraith)
+                {
+                    for (int w = 0; w < 9; w++)
+                    {
+                        if (i == enemy.W_coordinate[w][0] && k == enemy.W_coordinate[w][1])
+                            isEnemy = true;
+                    }
+                }
+
+                for (const auto &enemy : banshee)
+                {
+                    for (int b = 0; b < 16; b++)
+                    {
+                        if (i == enemy.B_coordinate[b][0] && k == enemy.B_coordinate[b][1])
+                            isEnemy = true;
+                    }
+                }
+
+                // Check if the current position is occupied by a bullet
+                for (const auto &bullet : bullets)
+                {
+                    if (i == bullet.coordinate[0][0] && k == bullet.coordinate[0][1])
+                        isBullet = true;
+                }
+
+                
                 if (isSpaceShip)
                 {
-                    cout << "| " << spaceShip.shape << " ";
+                    cout << "| " << spaceship.shape << " ";
+                }
+                else if (isEnemy)
+                {
+                    cout << "| * "; // The symbol for Enemy
+                }
+                else if (isBullet)
+                {
+                    cout << "| ^ "; // The symbol for Bullet
                 }
                 else
                 {
@@ -158,6 +241,83 @@ void printMap(const int n, const GameData &gameData, const Enemy &enemy, const S
         }
 
         cout << endl;
+
+
+             
+
+            
     }
 
 }
+
+int Random()
+{
+    srand(time(0));
+    int x = rand() % 4;
+
+    if (x == 0)
+        return 0;
+    else if (x == 1)
+        return 1;
+    else if (x == 2)
+        return 2;
+    else 
+    return 3;
+}
+
+void coordinates(int n , vector<Dart>& dart, vector<Striker>& striker,
+                        vector<Wraith>& wraith, vector<Banshee>& banshee )
+{
+    int enemyType = Random();
+
+    // Depending on the random number, spawn the corresponding enemy
+    if (enemyType == 0)
+    {
+        Dart newDart;
+
+        newDart.D_coordinate[0][0] = 0;
+        newDart.D_coordinate[0][1] = rand() % n;
+
+        dart.push_back(newDart);
+    }
+    else if (enemyType == 1)
+    {
+        Striker newStriker;
+
+        int y = rand() % (n-1);
+        for (int i = 0; i < 4; i++)
+        {
+            newStriker.S_coordinate[i][0] = i / 2 ;
+            newStriker.S_coordinate[i][1] = y + (i % 2);
+        }
+
+        striker.push_back(newStriker);
+    }
+    else if (enemyType == 2)
+    {
+        Wraith newWraith;
+
+        int y = rand() % (n-2);
+        for (int i = 0; i < 9; i++)
+        {
+            newWraith.W_coordinate[i][0] = i / 3 ;
+            newWraith.W_coordinate[i][1] = y + (i % 3);
+        }
+
+        wraith.push_back(newWraith);
+    }
+    else if (enemyType == 3)
+    {
+        Banshee newBanshee;
+
+        int y = rand() % (n-3);
+        for (int i = 0; i < 16; i++)
+        {
+            newBanshee.B_coordinate[i][0] = i / 4 ;
+            newBanshee.B_coordinate[i][1] = y + (i % 4);
+        }
+
+        banshee.push_back(newBanshee);
+    }
+}
+
