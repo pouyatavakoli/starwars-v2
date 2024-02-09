@@ -23,21 +23,33 @@ struct Enemy
     int size;
     int heal;
     int count;
+    // Add color here
     // Add position here
 };
-
+// struct for saving spaceship types details
+struct SpaceShip
+{
+    // The shape can be any character, or even the first letter of a player's name
+    char shape = '@';
+    int power;
+    // other details
+};
 // main menu
 void mainMenu(int);
 // function to save enemies data in file
 void saveEnemies(const vector<Enemy> &enemies);
+// function to save all game data
 void gameSaver(const vector<Enemy> &enemies);
-// TODO : struct for saving spaceship types details if needed
-// TODO : function to draw the map
+// function to initialize the game
+void initializeGame();
+// function to end the game
+void endGame();
+// function to draw the map
+void printMap(const int n, const GameData &gameData, const Enemy &enemy, const SpaceShip &spaceShip);
 // TODO : function to move the spaceship
 // TODO : function to shoot
 // TODO : scoring system
 // TODO : function to refresh game environment
-// TODO : menu (pause resume change spaceship etc)
 // TODO : saving game data in file (delete the file when game ends)
 // TODO : win / lose logic
 
@@ -96,4 +108,56 @@ void gameSaver(const vector<Enemy> &enemies)
 {
     saveEnemies(enemies);
     // save other game info
+}
+
+void initializeGame()
+{
+    // creates files game needs to operate
+    ofstream file("enemy.txt");
+    // File is automatically closed when file goes out of scope
+}
+void endGame()
+{
+    // delete all files
+}
+
+void printMap(const int n, const GameData &gameData, const Enemy &enemy, const SpaceShip &spaceShip)
+{
+     for (int i = 0; i <= n; i++)
+    {
+        for (int j = 0; j < n; j++)
+            cout << " ---";
+
+        cout << endl;
+
+        if (i <= 9)
+        {
+            for (int k = 0; k <= 10; k++)
+            {
+                bool isStar = false;
+                bool isSpaceShip = false;
+                // Check if the current position is a star or a spaceship
+                for (int l = 0; l < 10; l++)
+                {
+                 //TODO : enemy check and print  
+                    if (i == gameData.ship_x  && k ==  n)
+                    {
+                        isSpaceShip = true;
+                        break;
+                    }
+                }
+                if (isSpaceShip)
+                {
+                    cout << "| " << spaceShip.shape << " ";
+                }
+                else
+                {
+                    cout << "|   ";
+                }
+            }
+        }
+
+        cout << endl;
+    }
+
 }
