@@ -88,8 +88,17 @@ void endGame();
 // function to draw the map
 void printMap(int n, SpaceShip &spaceship, vector<Dart> &dart, vector<Striker> &striker,
               vector<Wraith> &wraith, vector<Banshee> &banshee, vector<Bullet> &bullets);
-// TODO : function to move the spaceship
-// TODO : function to shoot
+
+void move_right(SpaceShip &spaceship, int n);
+
+void move_left(SpaceShip &spaceship, int n);
+
+void new_bullet_maker(vector<Bullet> &bullets ,SpaceShip &spaceship ,int n );
+void move_bullets(vector<Bullet> &bullets);
+
+void move_enemies_down(vector<Dart> &dart, vector<Striker> &striker,
+                     vector<Wraith> &wraith, vector<Banshee> &banshee);
+
 // TODO : scoring system
 // TODO : function to refresh game environment
 // TODO : saving game data in file (delete the file when game ends)
@@ -119,7 +128,33 @@ int main()
         spaceship.ship_y = (n - 1) / 2;
 
     coordinates(n ,dart, striker, wraith, banshee);
+    new_bullet_maker(bullets , spaceship , n);
     printMap(n, spaceship, dart, striker, wraith, banshee, bullets);
+
+        int move;
+        while (true)
+        {
+            cout << "move : ";
+            cin >> move;
+            if (move == 1)
+            {
+                move_left(spaceship, n);
+                
+            }
+            else if (move == 2)
+            {
+                move_right(spaceship, n);
+                
+            }
+            
+        move_bullets(bullets);
+        new_bullet_maker(bullets , spaceship , n);
+        move_enemies_down(dart, striker, wraith, banshee);
+        printMap(n, spaceship, dart, striker, wraith, banshee, bullets);
+
+        }
+
+    
 
     return 0;
 }
@@ -320,4 +355,72 @@ void coordinates(int n , vector<Dart>& dart, vector<Striker>& striker,
         banshee.push_back(newBanshee);
     }
 }
+
+void move_left(SpaceShip &spaceship, int n)
+{
+    if (spaceship.ship_y > 0)
+    {
+        spaceship.ship_y--;
+    }
+}
+
+void move_right(SpaceShip &spaceship, int n)
+{
+    if (spaceship.ship_y < n - 1)
+    {
+        spaceship.ship_y++;
+    }
+
+}
+
+void move_enemies_down(vector<Dart> &dart, vector<Striker> &striker,
+                     vector<Wraith> &wraith, vector<Banshee> &banshee)
+{
+    for (auto &enemy : dart)
+    {
+        enemy.D_coordinate[0][0]++;
+    }
+
+    for (auto &enemy : striker)
+    {
+        for (int s = 0; s < 4; s++)
+        {
+            enemy.S_coordinate[s][0]++;
+        }
+    }
+
+    for (auto &enemy : wraith)
+    {
+        for (int w = 0; w < 9; w++)
+        {
+            enemy.W_coordinate[w][0]++;
+        }
+    }
+
+    for (auto &enemy : banshee)
+    {
+        for (int b = 0; b < 16; b++)
+        {
+            enemy.B_coordinate[b][0]++;
+        }
+    }
+}
+
+void new_bullet_maker(vector<Bullet> &bullets, SpaceShip &spaceship , int n)
+{
+    Bullet newBullet;
+    newBullet.coordinate[0][0] = n - 2; // Spaceship's row position
+    newBullet.coordinate[0][1] = spaceship.ship_y; // Spaceship's column position
+    bullets.push_back(newBullet);
+}
+
+void move_bullets(vector<Bullet> &bullets)
+{
+    for (auto &bullet : bullets)
+    {
+        bullet.coordinate[0][0]--;
+    }
+}
+
+
 
