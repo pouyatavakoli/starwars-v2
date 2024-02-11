@@ -5,6 +5,11 @@
 #include <fstream>
 #include <vector>
 #include <time.h>
+#include <conio.h>
+#define up_key 72
+#define down_key 80
+#define left_key 75
+#define right_key 77
 
 using namespace std;
 
@@ -76,9 +81,9 @@ struct Bullet
 void mainMenu(int);
 // function to save enemies data in file
 void saveEnemies();
-//checking enemy coordinates.
-void coordinates(const int n , vector<Dart> &dart, vector<Striker> &striker,
-                     vector<Wraith> &wraith, vector<Banshee> &banshee);
+// checking enemy coordinates.
+void coordinates(const int n, vector<Dart> &dart, vector<Striker> &striker,
+                 vector<Wraith> &wraith, vector<Banshee> &banshee);
 // function to save all game data
 void gameSaver();
 // function to initialize the game
@@ -93,68 +98,79 @@ void move_right(SpaceShip &spaceship, int n);
 
 void move_left(SpaceShip &spaceship, int n);
 
-void new_bullet_maker(vector<Bullet> &bullets ,SpaceShip &spaceship ,int n );
+void new_bullet_maker(vector<Bullet> &bullets, SpaceShip &spaceship, int n);
 void move_bullets(vector<Bullet> &bullets);
 
 void move_enemies_down(vector<Dart> &dart, vector<Striker> &striker,
-                     vector<Wraith> &wraith, vector<Banshee> &banshee);
+                       vector<Wraith> &wraith, vector<Banshee> &banshee);
 
 // TODO : scoring system
-// TODO : function to refresh game environment
 // TODO : saving game data in file (delete the file when game ends)
 // TODO : win / lose logic
 
 int main()
-{   
-    int n ;
+{
+    int n;
     SpaceShip spaceship;
-    vector <Bullet> bullets;
-    vector <Dart> dart;
-    vector <Striker> striker;
-    vector <Wraith> wraith;
-    vector <Banshee> banshee;
-    GameData gamedata;
-    
+    vector<Bullet> bullets;
+    vector<Dart> dart;
+    vector<Striker> striker;
+    vector<Wraith> wraith;
+    vector<Banshee> banshee;
+    GameData gameData;
 
     cout << "n : ";
     cin >> n;
 
-    if(n % 2 == 0)
+    if (n % 2 == 0)
+    {
+        n++;
+        cout << "you entered even number. for better visuals map is generated for n = " << n << endl;
+        spaceship.ship_y = n / 2;
+    }
+
+    else
 
         spaceship.ship_y = n / 2;
-    
-    else 
 
-        spaceship.ship_y = (n - 1) / 2;
-
-    coordinates(n ,dart, striker, wraith, banshee);
-    new_bullet_maker(bullets , spaceship , n);
+    coordinates(n, dart, striker, wraith, banshee);
+    // new_bullet_maker(bullets, spaceship, n);
     printMap(n, spaceship, dart, striker, wraith, banshee, bullets);
 
-        int move;
-        while (true)
+    int move;
+    while (true)
+    {
+        cout << "press arrow key to move left or right : " << endl;
+        move = getch();
+        if (move == left_key)
         {
-            cout << "move : ";
-            cin >> move;
-            if (move == 1)
-            {
-                move_left(spaceship, n);
-                
-            }
-            else if (move == 2)
-            {
-                move_right(spaceship, n);
-                
-            }
-            
-        move_bullets(bullets);
-        new_bullet_maker(bullets , spaceship , n);
-        move_enemies_down(dart, striker, wraith, banshee);
-        printMap(n, spaceship, dart, striker, wraith, banshee, bullets);
-
+            move_left(spaceship, n);
+            new_bullet_maker(bullets, spaceship, n);
+            move_enemies_down(dart, striker, wraith, banshee);
+            move_bullets(bullets);
+        }
+        else if (move == right_key)
+        {
+            move_right(spaceship, n);
+            new_bullet_maker(bullets, spaceship, n);
+            move_enemies_down(dart, striker, wraith, banshee);
+            move_bullets(bullets);
+        }
+        else if (move == up_key)
+        {
+            new_bullet_maker(bullets, spaceship, n);
+            new_bullet_maker(bullets, spaceship, n);
+            move_enemies_down(dart, striker, wraith, banshee);
+            move_bullets(bullets);
+        }
+        else if (move == 'q' || move == 'Q')
+        {
+            cout << "quitting the game";
+            return 0;
         }
 
-    
+        printMap(n, spaceship, dart, striker, wraith, banshee, bullets);
+    }
 
     return 0;
 }
@@ -168,15 +184,15 @@ void mainMenu(int situation)
     {
     case 1:
         // Start new game menu
-        cout << "1 - start new game"   << endl
+        cout << "1 - start new game" << endl
              << "2 - change game mode" << endl
-             << "3 - quit game"        << endl;
+             << "3 - quit game" << endl;
         break;
     case 2:
         // Resume game menu
         cout << "1 - resume game" << endl
-             << "2 - save game"   << endl
-             << "3 - quit game"   << endl;
+             << "2 - save game" << endl
+             << "3 - quit game" << endl;
         break;
     case 3:
         // Change game settings menu
@@ -189,29 +205,28 @@ void mainMenu(int situation)
     }
 }
 
-
-
-void printMap(int n,SpaceShip &spaceship, vector<Dart>& dart, vector<Striker>& striker,
-                 vector<Wraith>& wraith, vector<Banshee>& banshee ,vector<Bullet> &bullets)
+void printMap(int n, SpaceShip &spaceship, vector<Dart> &dart, vector<Striker> &striker,
+              vector<Wraith> &wraith, vector<Banshee> &banshee, vector<Bullet> &bullets)
 {
-     for (int i = 0; i <= n; i++)
+    system("cls");
+    for (int i = 0; i <= n; i++)
     {
         for (int j = 0; j < n; j++)
             cout << " ---";
 
         cout << endl;
 
-        if (i <= n-1)
+        if (i <= n - 1)
         {
             for (int k = 0; k <= n; k++)
             {
-                
+
                 bool isSpaceShip = false;
-                bool isEnemy     = false;
-                bool isBullet    = false;
-                for (int s = 0 ; s < n-1 ; s++ )
+                bool isEnemy = false;
+                bool isBullet = false;
+                for (int s = 0; s < n - 1; s++)
                 {
-                    if(i == n-1 && k == spaceship.ship_y)
+                    if (i == n - 1 && k == spaceship.ship_y)
                         isSpaceShip = true;
                 }
 
@@ -255,7 +270,6 @@ void printMap(int n,SpaceShip &spaceship, vector<Dart>& dart, vector<Striker>& s
                         isBullet = true;
                 }
 
-                
                 if (isSpaceShip)
                 {
                     cout << "| " << spaceship.shape << " ";
@@ -276,13 +290,7 @@ void printMap(int n,SpaceShip &spaceship, vector<Dart>& dart, vector<Striker>& s
         }
 
         cout << endl;
-
-
-             
-
-            
     }
-
 }
 
 int Random()
@@ -296,12 +304,12 @@ int Random()
         return 1;
     else if (x == 2)
         return 2;
-    else 
-    return 3;
+    else
+        return 3;
 }
 
-void coordinates(int n , vector<Dart>& dart, vector<Striker>& striker,
-                        vector<Wraith>& wraith, vector<Banshee>& banshee )
+void coordinates(int n, vector<Dart> &dart, vector<Striker> &striker,
+                 vector<Wraith> &wraith, vector<Banshee> &banshee)
 {
     int enemyType = Random();
 
@@ -319,10 +327,10 @@ void coordinates(int n , vector<Dart>& dart, vector<Striker>& striker,
     {
         Striker newStriker;
 
-        int y = rand() % (n-1);
+        int y = rand() % (n - 1);
         for (int i = 0; i < 4; i++)
         {
-            newStriker.S_coordinate[i][0] = i / 2 ;
+            newStriker.S_coordinate[i][0] = i / 2;
             newStriker.S_coordinate[i][1] = y + (i % 2);
         }
 
@@ -332,10 +340,10 @@ void coordinates(int n , vector<Dart>& dart, vector<Striker>& striker,
     {
         Wraith newWraith;
 
-        int y = rand() % (n-2);
+        int y = rand() % (n - 2);
         for (int i = 0; i < 9; i++)
         {
-            newWraith.W_coordinate[i][0] = i / 3 ;
+            newWraith.W_coordinate[i][0] = i / 3;
             newWraith.W_coordinate[i][1] = y + (i % 3);
         }
 
@@ -345,10 +353,10 @@ void coordinates(int n , vector<Dart>& dart, vector<Striker>& striker,
     {
         Banshee newBanshee;
 
-        int y = rand() % (n-3);
+        int y = rand() % (n - 3);
         for (int i = 0; i < 16; i++)
         {
-            newBanshee.B_coordinate[i][0] = i / 4 ;
+            newBanshee.B_coordinate[i][0] = i / 4;
             newBanshee.B_coordinate[i][1] = y + (i % 4);
         }
 
@@ -370,11 +378,10 @@ void move_right(SpaceShip &spaceship, int n)
     {
         spaceship.ship_y++;
     }
-
 }
 
 void move_enemies_down(vector<Dart> &dart, vector<Striker> &striker,
-                     vector<Wraith> &wraith, vector<Banshee> &banshee)
+                       vector<Wraith> &wraith, vector<Banshee> &banshee)
 {
     for (auto &enemy : dart)
     {
@@ -406,10 +413,10 @@ void move_enemies_down(vector<Dart> &dart, vector<Striker> &striker,
     }
 }
 
-void new_bullet_maker(vector<Bullet> &bullets, SpaceShip &spaceship , int n)
+void new_bullet_maker(vector<Bullet> &bullets, SpaceShip &spaceship, int n)
 {
     Bullet newBullet;
-    newBullet.coordinate[0][0] = n - 2; // Spaceship's row position
+    newBullet.coordinate[0][0] = n - 1;            // Spaceship's row position
     newBullet.coordinate[0][1] = spaceship.ship_y; // Spaceship's column position
     bullets.push_back(newBullet);
 }
@@ -421,6 +428,3 @@ void move_bullets(vector<Bullet> &bullets)
         bullet.coordinate[0][0]--;
     }
 }
-
-
-
