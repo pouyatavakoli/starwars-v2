@@ -18,6 +18,7 @@ struct GameData
 {
     int level = 1;
     int point = 0;
+    int killCounter = 0 ;
 };
 
 // struct for saving enemy details
@@ -129,8 +130,8 @@ void refresh(GameData &gameData, vector<Dart> &dart, vector<Striker> &striker,
 
 int main()
 {
-    // to do : enemy counter
     int n;
+    int enemyCount;
     SpaceShip spaceship;
     vector<Bullet> bullets;
     vector<Dart> darts;
@@ -141,7 +142,8 @@ int main()
 
     cout << "n : ";
     cin >> n;
-
+    cout << "how many enemies you want to kill: ";
+    cin >> enemyCount;
     if (n % 2 == 0)
     {
         n++;
@@ -158,7 +160,7 @@ int main()
     printMap(n, spaceship, darts, strikers, wraiths, banshees, bullets);
 
     int move;
-    while (shipStatus(spaceship))
+    while (shipStatus(spaceship) && gameData.killCounter != enemyCount)
     {
         cout << "press arrow keys to move left or right : " << endl;
         cout << "point : " << gameData.point << endl;
@@ -188,6 +190,9 @@ int main()
         printMap(n, spaceship, darts, strikers, wraiths, banshees, bullets);
     }
     system("cls");
+    if(gameData.killCounter == enemyCount)
+        cout << "we have a winner";
+        return 0;
     cout << "looooser";
     return 0;
 }
@@ -494,6 +499,7 @@ void enemy_damage_check(GameData &gameData,
         {
             dart.pop_back();
             gameData.point++;
+            gameData.killCounter++;
             coordinates(n, dart, striker, wraith, banshee);
         }
     }
@@ -503,6 +509,7 @@ void enemy_damage_check(GameData &gameData,
         {
             striker.pop_back();
             gameData.point++;
+            gameData.killCounter++;
             coordinates(n, dart, striker, wraith, banshee);
         }
     }
@@ -512,6 +519,7 @@ void enemy_damage_check(GameData &gameData,
         {
             wraith.pop_back();
             gameData.point++;
+            gameData.killCounter++;
             coordinates(n, dart, striker, wraith, banshee);
         }
     }
@@ -521,6 +529,7 @@ void enemy_damage_check(GameData &gameData,
         {
             banshee.pop_back();
             gameData.point++;
+            gameData.killCounter++;
             coordinates(n, dart, striker, wraith, banshee);
         }
     }
