@@ -18,7 +18,6 @@ struct GameData
 {
     int level = 1;
     int point = 0;
-    int heal = 3;
 };
 
 // struct for saving enemy details
@@ -69,7 +68,7 @@ struct SpaceShip
     int ship_y;
     char shape = '@';
     int power;
-    // other details
+    int heal = 3;
 };
 
 struct Bullet
@@ -106,7 +105,10 @@ void move_enemies_down(vector<Dart> &dart, vector<Striker> &striker,
 void enemy_damage_check(GameData &gameData,
                         vector<Dart> &dart, vector<Striker> &striker,
                         vector<Wraith> &wraith, vector<Banshee> &banshee,
-                        vector<Bullet> &bullets , int n);
+                        vector<Bullet> &bullets, int n);
+void ship_heal_check(int n, vector<Dart> &dart, vector<Striker> &striker,
+                     vector<Wraith> &wraith, vector<Banshee> &banshee, SpaceShip &spaceship);
+bool shipStatus(SpaceShip &spaceShip);
 
 /*bool bullet_hit_enemy(vector<Dart> &dart, vector<Striker> &striker,
                       vector<Wraith> &wraith, vector<Banshee> &banshee,
@@ -127,6 +129,7 @@ void refresh(GameData &gameData, vector<Dart> &dart, vector<Striker> &striker,
 
 int main()
 {
+    // to do : enemy counter
     int n;
     SpaceShip spaceship;
     vector<Bullet> bullets;
@@ -155,10 +158,11 @@ int main()
     printMap(n, spaceship, darts, strikers, wraiths, banshees, bullets);
 
     int move;
-    while (true)
+    while (shipStatus(spaceship))
     {
         cout << "press arrow keys to move left or right : " << endl;
-        cout << gameData.point << endl;
+        cout << "point : " << gameData.point << endl;
+        cout << "heal  : " << spaceship.heal;
         move = getch();
         if (move == left_key)
         {
@@ -176,13 +180,15 @@ int main()
         }
         else if (move == 'q' || move == 'Q')
         {
+            system("cls") ;
             cout << "you quitted the game";
             return 0;
         }
 
         printMap(n, spaceship, darts, strikers, wraiths, banshees, bullets);
     }
-
+    system("cls");
+    cout << "looooser";
     return 0;
 }
 
@@ -480,7 +486,7 @@ void enemy_heal_check(vector<Dart> &dart, vector<Striker> &striker,
 void enemy_damage_check(GameData &gameData,
                         vector<Dart> &dart, vector<Striker> &striker,
                         vector<Wraith> &wraith, vector<Banshee> &banshee,
-                        vector<Bullet> &bullets , int n)
+                        vector<Bullet> &bullets, int n)
 {
     for (auto &enemy : dart)
     {
@@ -519,13 +525,65 @@ void enemy_damage_check(GameData &gameData,
         }
     }
 }
+void ship_heal_check(int n, vector<Dart> &dart, vector<Striker> &striker,
+                     vector<Wraith> &wraith, vector<Banshee> &banshee, SpaceShip &spaceship)
+{
+    for (auto &enemy : dart)
+    {
+        if (enemy.D_coordinate[0][0] == n && enemy.D_coordinate[0][1] == spaceship.ship_y)
+        {
+            spaceship.heal--;
+        }
+    }
+
+    for (auto &enemy : striker)
+    {
+        for (int s = 0; s < 4; s++)
+        {
+            if (enemy.S_coordinate[s][0] == n && enemy.S_coordinate[s][1] == spaceship.ship_y)
+            {
+                spaceship.heal--;
+            }
+        }
+    }
+
+    for (auto &enemy : wraith)
+    {
+        for (int w = 0; w < 9; w++)
+        {
+            if (enemy.W_coordinate[w][0] == n && enemy.W_coordinate[w][1] == spaceship.ship_y)
+            {
+                spaceship.heal--;
+            }
+        }
+    }
+
+    for (auto &enemy : banshee)
+    {
+        for (int b = 0; b < 16; b++)
+        {
+            if (enemy.B_coordinate[b][0] == n && enemy.B_coordinate[b][1] == spaceship.ship_y)
+            {
+                spaceship.heal--;
+            }
+        }
+    }
+}
+
+bool shipStatus(SpaceShip &spaceShip)
+{
+    if (spaceShip.heal == 0)
+        return false; // ship is dead
+    return true;
+};
 
 void refresh(GameData &gameData, vector<Dart> &dart, vector<Striker> &striker,
              vector<Wraith> &wraith, vector<Banshee> &banshee,
              vector<Bullet> &bullets, SpaceShip &spaceship, int n)
 {
+    ship_heal_check(n, dart, striker, wraith, banshee, spaceship);
     enemy_heal_check(dart, striker, wraith, banshee, bullets);
-    enemy_damage_check(gameData, dart, striker, wraith, banshee, bullets , n);
+    enemy_damage_check(gameData, dart, striker, wraith, banshee, bullets, n);
     new_bullet_maker(bullets, spaceship, n);
     move_enemies_down(dart, striker, wraith, banshee);
     move_bullets(bullets);
