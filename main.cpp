@@ -95,16 +95,33 @@ void printMap(int n, SpaceShip &spaceship, vector<Dart> &dart, vector<Striker> &
               vector<Wraith> &wraith, vector<Banshee> &banshee, vector<Bullet> &bullets);
 
 void move_right(SpaceShip &spaceship, int n);
-
 void move_left(SpaceShip &spaceship, int n);
 
 void new_bullet_maker(vector<Bullet> &bullets, SpaceShip &spaceship, int n);
-void move_bullets(vector<Bullet> &bullets);
 
+void move_bullets(vector<Bullet> &bullets);
 void move_enemies_down(vector<Dart> &dart, vector<Striker> &striker,
                        vector<Wraith> &wraith, vector<Banshee> &banshee);
 
-// TODO : scoring system
+void enemy_damage_check(GameData &gameData,
+                        vector<Dart> &dart, vector<Striker> &striker,
+                        vector<Wraith> &wraith, vector<Banshee> &banshee,
+                        vector<Bullet> &bullets);
+
+/*bool bullet_hit_enemy(vector<Dart> &dart, vector<Striker> &striker,
+                      vector<Wraith> &wraith, vector<Banshee> &banshee,
+                      vector<Bullet> &bullets);*/
+
+/*
+function to check damage of each enemy and remove it if  enemy heal is 0 ,
+creat new bullet
+move bullets up and
+move enemies down
+*/
+void refresh(GameData &gameData, vector<Dart> &dart, vector<Striker> &striker,
+             vector<Wraith> &wraith, vector<Banshee> &banshee,
+             vector<Bullet> &bullets, SpaceShip &spaceship, int n);
+
 // TODO : saving game data in file (delete the file when game ends)
 // TODO : win / lose logic
 
@@ -113,10 +130,10 @@ int main()
     int n;
     SpaceShip spaceship;
     vector<Bullet> bullets;
-    vector<Dart> dart;
-    vector<Striker> striker;
-    vector<Wraith> wraith;
-    vector<Banshee> banshee;
+    vector<Dart> darts;
+    vector<Striker> strikers;
+    vector<Wraith> wraiths;
+    vector<Banshee> banshees;
     GameData gameData;
 
     cout << "n : ";
@@ -125,7 +142,8 @@ int main()
     if (n % 2 == 0)
     {
         n++;
-        cout << "you entered even number. for better visuals map is generated for n = " << n << endl;
+        cout << "you entered even number. "
+             << "for better visuals map is generated for n = " << n << endl;
         spaceship.ship_y = n / 2;
     }
 
@@ -133,43 +151,36 @@ int main()
 
         spaceship.ship_y = n / 2;
 
-    coordinates(n, dart, striker, wraith, banshee);
-    // new_bullet_maker(bullets, spaceship, n);
-    printMap(n, spaceship, dart, striker, wraith, banshee, bullets);
+    coordinates(n, darts, strikers, wraiths, banshees);
+    printMap(n, spaceship, darts, strikers, wraiths, banshees, bullets);
 
     int move;
     while (true)
     {
-        cout << "press arrow key to move left or right : " << endl;
+        cout << "press arrow keys to move left or right : " << endl;
+        cout << gameData.point << endl;
         move = getch();
         if (move == left_key)
         {
             move_left(spaceship, n);
-            new_bullet_maker(bullets, spaceship, n);
-            move_enemies_down(dart, striker, wraith, banshee);
-            move_bullets(bullets);
+            refresh(gameData, darts, strikers, wraiths, banshees, bullets, spaceship, n);
         }
         else if (move == right_key)
         {
             move_right(spaceship, n);
-            new_bullet_maker(bullets, spaceship, n);
-            move_enemies_down(dart, striker, wraith, banshee);
-            move_bullets(bullets);
+            refresh(gameData, darts, strikers, wraiths, banshees, bullets, spaceship, n);
         }
         else if (move == up_key)
         {
-            new_bullet_maker(bullets, spaceship, n);
-            new_bullet_maker(bullets, spaceship, n);
-            move_enemies_down(dart, striker, wraith, banshee);
-            move_bullets(bullets);
+            refresh(gameData, darts, strikers, wraiths, banshees, bullets, spaceship, n);
         }
         else if (move == 'q' || move == 'Q')
         {
-            cout << "quitting the game";
+            cout << "you quitted the game";
             return 0;
         }
 
-        printMap(n, spaceship, dart, striker, wraith, banshee, bullets);
+        printMap(n, spaceship, darts, strikers, wraiths, banshees, bullets);
     }
 
     return 0;
@@ -205,8 +216,11 @@ void mainMenu(int situation)
     }
 }
 
-void printMap(int n, SpaceShip &spaceship, vector<Dart> &dart, vector<Striker> &striker,
-              vector<Wraith> &wraith, vector<Banshee> &banshee, vector<Bullet> &bullets)
+void printMap(int n,
+              SpaceShip &spaceship,
+              vector<Dart> &dart, vector<Striker> &striker,
+              vector<Wraith> &wraith,
+              vector<Banshee> &banshee, vector<Bullet> &bullets)
 {
     system("cls");
     for (int i = 0; i <= n; i++)
@@ -293,26 +307,12 @@ void printMap(int n, SpaceShip &spaceship, vector<Dart> &dart, vector<Striker> &
     }
 }
 
-int Random()
-{
-    srand(time(0));
-    int x = rand() % 4;
-
-    if (x == 0)
-        return 0;
-    else if (x == 1)
-        return 1;
-    else if (x == 2)
-        return 2;
-    else
-        return 3;
-}
-
 void coordinates(int n, vector<Dart> &dart, vector<Striker> &striker,
                  vector<Wraith> &wraith, vector<Banshee> &banshee)
 {
-    int enemyType = Random();
-
+    // pick a random enemy type between 4 types
+    srand(time(0));
+    int enemyType = rand() % 4;
     // Depending on the random number, spawn the corresponding enemy
     if (enemyType == 0)
     {
@@ -428,3 +428,154 @@ void move_bullets(vector<Bullet> &bullets)
         bullet.coordinate[0][0]--;
     }
 }
+void enemy_heal_check(vector<Dart> &dart, vector<Striker> &striker,
+                      vector<Wraith> &wraith, vector<Banshee> &banshee,
+                      vector<Bullet> &bullets)
+{
+    for (auto &bullet : bullets)
+    {
+        for (auto &enemy : dart)
+        {
+            if (enemy.D_coordinate[0][0] == bullet.coordinate[0][0] && enemy.D_coordinate[0][1] == bullet.coordinate[0][1])
+            {
+                enemy.heal--;
+            }
+        }
+
+        for (auto &enemy : striker)
+        {
+            for (int s = 0; s < 4; s++)
+            {
+                if (enemy.S_coordinate[s][0] == bullet.coordinate[0][0] && enemy.S_coordinate[s][1] == bullet.coordinate[0][1])
+                {
+                    enemy.heal--;
+                }
+            }
+        }
+
+        for (auto &enemy : wraith)
+        {
+            for (int w = 0; w < 9; w++)
+            {
+                if (enemy.W_coordinate[w][0] == bullet.coordinate[0][0] && enemy.W_coordinate[w][1] == bullet.coordinate[0][1])
+                {
+                    enemy.heal--;
+                }
+            }
+        }
+
+        for (auto &enemy : banshee)
+        {
+            for (int b = 0; b < 16; b++)
+            {
+                if (enemy.B_coordinate[b][0] == bullet.coordinate[0][0] && enemy.B_coordinate[b][1] == bullet.coordinate[0][1])
+                {
+                    enemy.heal--;
+                }
+            }
+        }
+    }
+}
+
+void enemy_damage_check(GameData &gameData,
+                        vector<Dart> &dart, vector<Striker> &striker,
+                        vector<Wraith> &wraith, vector<Banshee> &banshee,
+                        vector<Bullet> &bullets)
+{
+    for (auto &enemy : dart)
+    {
+        if (enemy.heal == 0)
+        {
+            dart.pop_back();
+            gameData.point++;
+        }
+    }
+    for (auto &enemy : striker)
+    {
+        if (enemy.heal == 0)
+        {
+            striker.pop_back();
+            gameData.point++;
+        }
+    }
+    for (auto &enemy : wraith)
+    {
+        if (enemy.heal == 0)
+        {
+            wraith.pop_back();
+            gameData.point++;
+        }
+    }
+    for (auto &enemy : banshee)
+    {
+        if (enemy.heal == 0)
+        {
+            banshee.pop_back();
+            gameData.point++;
+        }
+    }
+}
+
+void refresh(GameData &gameData, vector<Dart> &dart, vector<Striker> &striker,
+             vector<Wraith> &wraith, vector<Banshee> &banshee,
+             vector<Bullet> &bullets, SpaceShip &spaceship, int n)
+{
+    enemy_heal_check(dart, striker, wraith, banshee, bullets);
+    enemy_damage_check(gameData, dart, striker, wraith, banshee, bullets);
+    new_bullet_maker(bullets, spaceship, n);
+    move_enemies_down(dart, striker, wraith, banshee);
+    move_bullets(bullets);
+}
+
+/*
+bool bullet_hit_enemy(vector<Dart> &dart, vector<Striker> &striker,
+                      vector<Wraith> &wraith, vector<Banshee> &banshee,
+                      vector<Bullet> &bullets)
+{
+    for (auto &bullet : bullets)
+    {
+        for (auto &enemy : dart)
+        {
+            if (enemy.D_coordinate[0][0] == bullet.coordinate[0][0] && enemy.D_coordinate[0][1] == bullet.coordinate[0][1])
+            {
+                return true;
+            }
+        }
+
+        for (auto &enemy : striker)
+        {
+            for (int s = 0; s < 4; s++)
+            {
+                if (enemy.S_coordinate[s][0] == bullet.coordinate[0][0] && enemy.S_coordinate[s][1] == bullet.coordinate[0][1])
+                {
+                    return true;
+                }
+            }
+        }
+
+        for (auto &enemy : wraith)
+        {
+            for (int w = 0; w < 9; w++)
+            {
+                if (enemy.W_coordinate[w][0] == bullet.coordinate[0][0] && enemy.W_coordinate[w][1] == bullet.coordinate[0][1])
+                {
+                    return true;
+                }
+            }
+        }
+
+        for (auto &enemy : banshee)
+        {
+            for (int b = 0; b < 16; b++)
+            {
+                if (enemy.B_coordinate[b][0] == bullet.coordinate[0][0] && enemy.B_coordinate[b][1] == bullet.coordinate[0][1])
+                {
+                    return true;
+                }
+            }
+        }
+
+    }
+    return false;
+}
+*/
