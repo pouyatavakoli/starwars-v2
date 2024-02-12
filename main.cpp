@@ -106,7 +106,7 @@ void move_enemies_down(vector<Dart> &dart, vector<Striker> &striker,
 void enemy_damage_check(GameData &gameData,
                         vector<Dart> &dart, vector<Striker> &striker,
                         vector<Wraith> &wraith, vector<Banshee> &banshee,
-                        vector<Bullet> &bullets);
+                        vector<Bullet> &bullets , int n);
 
 /*bool bullet_hit_enemy(vector<Dart> &dart, vector<Striker> &striker,
                       vector<Wraith> &wraith, vector<Banshee> &banshee,
@@ -480,7 +480,7 @@ void enemy_heal_check(vector<Dart> &dart, vector<Striker> &striker,
 void enemy_damage_check(GameData &gameData,
                         vector<Dart> &dart, vector<Striker> &striker,
                         vector<Wraith> &wraith, vector<Banshee> &banshee,
-                        vector<Bullet> &bullets)
+                        vector<Bullet> &bullets , int n)
 {
     for (auto &enemy : dart)
     {
@@ -488,6 +488,7 @@ void enemy_damage_check(GameData &gameData,
         {
             dart.pop_back();
             gameData.point++;
+            coordinates(n, dart, striker, wraith, banshee);
         }
     }
     for (auto &enemy : striker)
@@ -496,6 +497,7 @@ void enemy_damage_check(GameData &gameData,
         {
             striker.pop_back();
             gameData.point++;
+            coordinates(n, dart, striker, wraith, banshee);
         }
     }
     for (auto &enemy : wraith)
@@ -504,6 +506,7 @@ void enemy_damage_check(GameData &gameData,
         {
             wraith.pop_back();
             gameData.point++;
+            coordinates(n, dart, striker, wraith, banshee);
         }
     }
     for (auto &enemy : banshee)
@@ -512,6 +515,7 @@ void enemy_damage_check(GameData &gameData,
         {
             banshee.pop_back();
             gameData.point++;
+            coordinates(n, dart, striker, wraith, banshee);
         }
     }
 }
@@ -521,7 +525,7 @@ void refresh(GameData &gameData, vector<Dart> &dart, vector<Striker> &striker,
              vector<Bullet> &bullets, SpaceShip &spaceship, int n)
 {
     enemy_heal_check(dart, striker, wraith, banshee, bullets);
-    enemy_damage_check(gameData, dart, striker, wraith, banshee, bullets);
+    enemy_damage_check(gameData, dart, striker, wraith, banshee, bullets , n);
     new_bullet_maker(bullets, spaceship, n);
     move_enemies_down(dart, striker, wraith, banshee);
     move_bullets(bullets);
