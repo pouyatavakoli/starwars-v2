@@ -8,6 +8,11 @@
 #include <conio.h>
 #include <algorithm>
 
+#define RED_TEXT "\033[1;31m"
+#define GREEN_TEXT "\033[1;32m"
+#define YELLOW_TEXT "\033[1;33m"
+#define RESET_TEXT "\033[0m"
+
 #define up_key 72
 #define down_key 80
 #define left_key 75
@@ -304,15 +309,15 @@ void printMap(int n,
 
                 if (isSpaceShip)
                 {
-                    cout << "| " << spaceship.shape << " ";
+                    cout << "| " << GREEN_TEXT << spaceship.shape << RESET_TEXT << " ";
                 }
                 else if (isEnemy)
                 {
-                    cout << "| * "; // The symbol for Enemy
+                    cout << "| " << RED_TEXT << "* " << RESET_TEXT;
                 }
                 else if (isBullet)
                 {
-                    cout << "| ^ "; // The symbol for Bullet
+                    cout << "| " << YELLOW_TEXT << "^ " << RESET_TEXT; // The symbol for Bullet
                 }
                 else
                 {
