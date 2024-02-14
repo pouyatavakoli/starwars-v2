@@ -11,7 +11,12 @@
 #define RED_TEXT "\033[1;31m"
 #define GREEN_TEXT "\033[1;32m"
 #define YELLOW_TEXT "\033[1;33m"
+#define CYAN "\033[36m"
 #define RESET_TEXT "\033[0m"
+#define BRIGHT_WHITE "\033[97m"
+#define WHITE "\033[37m"
+#define BRIGHT_GREEN "\033[92m"
+
 
 #define up_key 72
 #define down_key 80
@@ -25,6 +30,7 @@ struct GameData
 {
     int level = 1;
     int point = 0;
+    int points_updater = 0;
     int killCounter = 0 ;
 };
 
@@ -105,7 +111,7 @@ void move_right(SpaceShip &spaceship, int n);
 void move_left(SpaceShip &spaceship, int n);
 
 void new_bullet_maker(vector<Bullet> &bullets, SpaceShip &spaceship, int n);
-
+bool bullet_outofbound(const Bullet &bullet);
 void move_bullets(vector<Bullet> &bullets);
 void move_enemies_down(vector<Dart> &dart, vector<Striker> &striker,
                        vector<Wraith> &wraith, vector<Banshee> &banshee);
@@ -123,16 +129,8 @@ void ship_heal_check(int n, vector<Dart> &dart, vector<Striker> &striker,
                      vector<Wraith> &wraith, vector<Banshee> &banshee, SpaceShip &spaceship);
 bool shipStatus(SpaceShip &spaceShip);
 
-/*bool bullet_hit_enemy(vector<Dart> &dart, vector<Striker> &striker,
-                      vector<Wraith> &wraith, vector<Banshee> &banshee,
-                      vector<Bullet> &bullets);*/
+void update_level(GameData &gamedata);
 
-/*
-function to check damage of each enemy and remove it if  enemy heal is 0 ,
-creat new bullet
-move bullets up and
-move enemies down
-*/
 void refresh(GameData &gameData, vector<Dart> &dart, vector<Striker> &striker,
              vector<Wraith> &wraith, vector<Banshee> &banshee,
              vector<Bullet> &bullets, SpaceShip &spaceship, int n);
@@ -176,8 +174,9 @@ int main()
     while (shipStatus(spaceship) && gameData.point < targetscore)
     {
         cout << "press arrow keys to move left or right : " << endl;
-        cout << "point : " << gameData.point << endl;
-        cout << "heal  : " << spaceship.heal;
+        cout << CYAN << "Level : " << gameData.level << RESET_TEXT <<endl;
+        cout << BRIGHT_WHITE <<"point : "  << WHITE << gameData.point << RESET_TEXT << endl;
+        cout << BRIGHT_GREEN <<"heal  : " << GREEN_TEXT << spaceship.heal << RESET_TEXT << endl;
         move = getch();
         if (move == left_key)
         {
@@ -458,13 +457,27 @@ void new_bullet_maker(vector<Bullet> &bullets, SpaceShip &spaceship, int n)
     bullets.push_back(newBullet);
 }
 
+bool bullet_outofbound(const Bullet &bullet)
+{
+    return bullet.coordinate[0][0] < 0;
+}
+
 void move_bullets(vector<Bullet> &bullets)
 {
-    for (auto &bullet : bullets)
+    for (auto it = bullets.begin(); it != bullets.end();)
     {
-        bullet.coordinate[0][0]--;
+        if (bullet_outofbound(*it))
+        {
+            it = bullets.erase(it); 
+        }
+        else
+        {
+            it->coordinate[0][0]--;
+            it++;
+        }
     }
 }
+
 bool isHit(const Dart& enemy, const Bullet& bullet) {
     return enemy.D_coordinate[0][0] == bullet.coordinate[0][0] &&
            enemy.D_coordinate[0][1] == bullet.coordinate[0][1];
@@ -549,7 +562,7 @@ void enemy_heal_check(vector<Dart>& dart, vector<Striker>& striker,
         if (bulletHit) {
             it = bullets.erase(it);
         } else {
-            ++it;
+            it++;
         }
     }
 }
@@ -565,6 +578,7 @@ void enemy_damage_check(GameData &gameData,
         {
             dart.pop_back();
             gameData.point += 1;
+            gameData.points_updater += 1; 
             gameData.killCounter++;
             coordinates(n, dart, striker, wraith, banshee, gameData);
         }
@@ -575,6 +589,7 @@ void enemy_damage_check(GameData &gameData,
         {
             striker.pop_back();
             gameData.point += 8;
+            gameData.points_updater += 8;
             gameData.killCounter++;
             coordinates(n, dart, striker, wraith, banshee , gameData);
         }
@@ -585,6 +600,7 @@ void enemy_damage_check(GameData &gameData,
         {
             wraith.pop_back();
             gameData.point += 18;
+            gameData.points_updater += 18;
             gameData.killCounter++;
             coordinates(n, dart, striker, wraith, banshee , gameData);
         }
@@ -595,6 +611,7 @@ void enemy_damage_check(GameData &gameData,
         {
             banshee.pop_back();
             gameData.point += 32;
+            gameData.points_updater += 32;
             gameData.killCounter++;
             coordinates(n, dart, striker, wraith, banshee , gameData);
         }
@@ -652,6 +669,16 @@ bool shipStatus(SpaceShip &spaceShip)
     return true;
 };
 
+void update_level(GameData &gamedata)
+{
+    if(gamedata.points_updater >= 200)
+    {
+        gamedata.points_updater -= 200;
+        gamedata.level++;
+    }
+}
+
+
 void refresh(GameData &gameData, vector<Dart> &dart, vector<Striker> &striker,
              vector<Wraith> &wraith, vector<Banshee> &banshee,
              vector<Bullet> &bullets, SpaceShip &spaceship, int n)
@@ -664,5 +691,6 @@ void refresh(GameData &gameData, vector<Dart> &dart, vector<Striker> &striker,
     enemy_heal_check(dart, striker, wraith, banshee, bullets);
     enemy_damage_check(gameData, dart, striker, wraith, banshee, bullets, n);
     move_bullets(bullets);
+    update_level(gameData);
 }
 
