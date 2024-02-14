@@ -90,7 +90,7 @@ void mainMenu(int);
 void saveEnemies();
 // checking enemy coordinates.
 void coordinates(const int n, vector<Dart> &dart, vector<Striker> &striker,
-                 vector<Wraith> &wraith, vector<Banshee> &banshee);
+                 vector<Wraith> &wraith, vector<Banshee> &banshee , GameData &gamedata);
 // function to save all game data
 void gameSaver();
 // function to initialize the game
@@ -143,7 +143,7 @@ void refresh(GameData &gameData, vector<Dart> &dart, vector<Striker> &striker,
 int main()
 {
     int n;
-    int enemyCount;
+    int targetscore;
     SpaceShip spaceship;
     vector<Bullet> bullets;
     vector<Dart> darts;
@@ -154,25 +154,26 @@ int main()
 
     cout << "n : ";
     cin >> n;
-    cout << "how many enemies you want to kill: ";
-    cin >> enemyCount;
+    cout << "What's your target score : ";
+    cin >> targetscore;
     if (n % 2 == 0)
     {
         n++;
         cout << "you entered even number. "
              << "for better visuals map is generated for n = " << n << endl;
         spaceship.ship_y = n / 2;
+        system("pause");
     }
 
     else
 
         spaceship.ship_y = n / 2;
 
-    coordinates(n, darts, strikers, wraiths, banshees);
+    coordinates(n, darts, strikers, wraiths, banshees , gameData);
     printMap(n, spaceship, darts, strikers, wraiths, banshees, bullets);
 
     int move;
-    while (shipStatus(spaceship) && gameData.killCounter != enemyCount)
+    while (shipStatus(spaceship) && gameData.point < targetscore)
     {
         cout << "press arrow keys to move left or right : " << endl;
         cout << "point : " << gameData.point << endl;
@@ -202,10 +203,11 @@ int main()
         printMap(n, spaceship, darts, strikers, wraiths, banshees, bullets);
     }
     system("cls");
-    if(gameData.killCounter == enemyCount)
+    if(gameData.point >= targetscore)
         cout << "we have a winner";
         return 0;
     cout << "looooser";
+    system("pause");
     return 0;
 }
 
@@ -331,13 +333,17 @@ void printMap(int n,
 }
 
 void coordinates(int n, vector<Dart> &dart, vector<Striker> &striker,
-                 vector<Wraith> &wraith, vector<Banshee> &banshee)
+                 vector<Wraith> &wraith, vector<Banshee> &banshee , GameData &gamedata)
 {
     // pick a random enemy type between 4 types
     srand(time(0));
-    int enemyType = rand() % 4;
     // Depending on the random number, spawn the corresponding enemy
-    if (enemyType == 0)
+    bool enemyexist = false;
+    do
+    {
+        int enemyType = rand() % 4;
+
+        if (enemyType == 0 && gamedata.point <= 50 )
     {
         Dart newDart;
 
@@ -345,8 +351,9 @@ void coordinates(int n, vector<Dart> &dart, vector<Striker> &striker,
         newDart.D_coordinate[0][1] = rand() % n;
 
         dart.push_back(newDart);
+        enemyexist = true;
     }
-    else if (enemyType == 1)
+    else if (enemyType == 1 && gamedata.point <= 400)
     {
         Striker newStriker;
 
@@ -358,8 +365,9 @@ void coordinates(int n, vector<Dart> &dart, vector<Striker> &striker,
         }
 
         striker.push_back(newStriker);
+        enemyexist = true;
     }
-    else if (enemyType == 2)
+    else if (enemyType == 2 && gamedata.point <= 1000)
     {
         Wraith newWraith;
 
@@ -371,6 +379,7 @@ void coordinates(int n, vector<Dart> &dart, vector<Striker> &striker,
         }
 
         wraith.push_back(newWraith);
+        enemyexist = true;
     }
     else if (enemyType == 3)
     {
@@ -384,7 +393,12 @@ void coordinates(int n, vector<Dart> &dart, vector<Striker> &striker,
         }
 
         banshee.push_back(newBanshee);
+        enemyexist = true;
     }
+        
+    } while (!enemyexist);
+    
+    
 }
 
 void move_left(SpaceShip &spaceship, int n)
@@ -550,9 +564,9 @@ void enemy_damage_check(GameData &gameData,
         if (enemy.heal <= 0)
         {
             dart.pop_back();
-            gameData.point++;
+            gameData.point += 1;
             gameData.killCounter++;
-            coordinates(n, dart, striker, wraith, banshee);
+            coordinates(n, dart, striker, wraith, banshee, gameData);
         }
     }
     for (auto &enemy : striker)
@@ -560,9 +574,9 @@ void enemy_damage_check(GameData &gameData,
         if (enemy.heal <= 0)
         {
             striker.pop_back();
-            gameData.point++;
+            gameData.point += 8;
             gameData.killCounter++;
-            coordinates(n, dart, striker, wraith, banshee);
+            coordinates(n, dart, striker, wraith, banshee , gameData);
         }
     }
     for (auto &enemy : wraith)
@@ -570,9 +584,9 @@ void enemy_damage_check(GameData &gameData,
         if (enemy.heal <= 0)
         {
             wraith.pop_back();
-            gameData.point++;
+            gameData.point += 18;
             gameData.killCounter++;
-            coordinates(n, dart, striker, wraith, banshee);
+            coordinates(n, dart, striker, wraith, banshee , gameData);
         }
     }
     for (auto &enemy : banshee)
@@ -580,9 +594,9 @@ void enemy_damage_check(GameData &gameData,
         if (enemy.heal <= 0)
         {
             banshee.pop_back();
-            gameData.point++;
+            gameData.point += 32;
             gameData.killCounter++;
-            coordinates(n, dart, striker, wraith, banshee);
+            coordinates(n, dart, striker, wraith, banshee , gameData);
         }
     }
 }
