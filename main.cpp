@@ -125,7 +125,8 @@ void update_level(GameData &gameData);
 void refresh(GameData &gameData, vector<Dart> &dart, vector<Striker> &striker,
              vector<Wraith> &wraith, vector<Banshee> &banshee,
              vector<Bullet> &bullets, SpaceShip &spaceship, int n);
-
+bool collision(int n, vector<Dart> &dart, vector<Striker> &striker,
+               vector<Wraith> &wraith, vector<Banshee> &banshee, SpaceShip &spaceship);
 // TODO : saving game data in file (delete the file when game ends)
 // TODO : win / lose logic
 
@@ -166,7 +167,7 @@ int main()
     {
         cout << "press arrow keys to move left or right : " << endl;
         cout << CYAN << "Level : " << gameData.level << RESET_TEXT << endl;
-        cout << BRIGHT_WHITE << "point : " << WHITE << gameData.point <<" / "<<targetScore<< RESET_TEXT << endl;
+        cout << BRIGHT_WHITE << "point : " << WHITE << gameData.point << " / " << targetScore << RESET_TEXT << endl;
         cout << BRIGHT_GREEN << "heal  : " << GREEN_TEXT << spaceship.heal << RESET_TEXT << endl;
         move = getch();
         if (move == left_key)
@@ -195,10 +196,10 @@ int main()
     system("cls");
     if (gameData.point >= targetScore)
     {
-        cout <<GREEN_TEXT<< "we have a WINNER" <<RESET_TEXT << endl;
+        cout << GREEN_TEXT << "we have a WINNER" << RESET_TEXT << endl;
         return 0;
     }
-    cout <<GREEN_TEXT<<"Game Over" <<RESET_TEXT<< endl;
+    cout << RED_TEXT << "Game Over" << RESET_TEXT << endl;
     system("pause");
     return 0;
 }
@@ -447,48 +448,98 @@ void new_bullet_maker(vector<Bullet> &bullets, SpaceShip &spaceship, int n)
     newBullet.coordinate[0][1] = spaceship.ship_y; // Spaceship's column position
     bullets.push_back(newBullet);
 }
-
+// checks of bullet is reached top of the map
 bool bullet_outOfBound(const Bullet &bullet)
 {
     return bullet.coordinate[0][0] < 0;
 }
-void enemy_outOFBound(GameData &gameData, int n, vector<Dart> &dart, vector<Striker> &striker,
-                      vector<Wraith> &wraith, vector<Banshee> &banshee)
+// checks is enemy is reached bottom of the map
+bool enemy_outOFBound(const int n, const vector<Dart> &dart, const vector<Striker> &striker,
+                      const vector<Wraith> &wraith, const vector<Banshee> &banshee)
 {
-    for (auto &enemy : dart)
+    for (const auto &enemy : dart)
     {
-        if (enemy.D_coordinate[0][0] == n - 1)
+        if (enemy.D_coordinate[0][0] == n)
         {
-            dart.pop_back();
-            coordinates(n, dart, striker, wraith, banshee, gameData);
+            return true;
         }
     }
 
-    for (auto &enemy : striker)
+    for (const auto &enemy : striker)
     {
-        if (enemy.S_coordinate[3][0] == n - 1)
+        if (enemy.S_coordinate[3][0] == n)
         {
-            striker.pop_back();
-            coordinates(n, dart, striker, wraith, banshee, gameData);
+            return true;
         }
     }
 
-    for (auto &enemy : wraith)
+    for (const auto &enemy : wraith)
     {
-
-        if (enemy.W_coordinate[8][0] == n - 1)
+        if (enemy.W_coordinate[8][0] == n)
         {
-            wraith.pop_back();
-            coordinates(n, dart, striker, wraith, banshee, gameData);
+            return true;
         }
     }
 
-    for (auto &enemy : banshee)
+    for (const auto &enemy : banshee)
     {
-        if (enemy.B_coordinate[15][0] == n - 1)
+        if (enemy.B_coordinate[15][0] == n)
         {
-            banshee.pop_back();
-            coordinates(n, dart, striker, wraith, banshee, gameData);
+            return true;
+        }
+    }
+
+    return false;
+}
+// removes the enemy and spawns a new enemy only if enemy is not already killed and removed
+void removeAndReSpawnEnemy(SpaceShip &spaceship, GameData &gameData, int n, vector<Dart> &dart, vector<Striker> &striker,
+                           vector<Wraith> &wraith, vector<Banshee> &banshee)
+{
+    for (const auto &enemy : dart)
+    {
+        if (enemy_outOFBound(n, dart, striker, wraith, banshee) || collision(n, dart, striker, wraith, banshee, spaceship))
+        {
+            if (enemy.heal > 0)
+            {
+                dart.pop_back();
+                coordinates(n, dart, striker, wraith, banshee, gameData);
+            }
+        }
+    }
+
+    for (const auto &enemy : striker)
+    {
+        if (enemy_outOFBound(n, dart, striker, wraith, banshee) || collision(n, dart, striker, wraith, banshee, spaceship))
+        {
+            if (enemy.heal > 0)
+            {
+                striker.pop_back();
+                coordinates(n, dart, striker, wraith, banshee, gameData);
+            }
+        }
+    }
+
+    for (const auto &enemy : wraith)
+    {
+        if (enemy_outOFBound(n, dart, striker, wraith, banshee) || collision(n, dart, striker, wraith, banshee, spaceship))
+        {
+            if (enemy.heal > 0)
+            {
+                wraith.pop_back();
+                coordinates(n, dart, striker, wraith, banshee, gameData);
+            }
+        }
+    }
+
+    for (const auto &enemy : banshee)
+    {
+        if (enemy_outOFBound(n, dart, striker, wraith, banshee) || collision(n, dart, striker, wraith, banshee, spaceship))
+        {
+            if (enemy.heal > 0)
+            {
+                banshee.pop_back();
+                coordinates(n, dart, striker, wraith, banshee, gameData);
+            }
         }
     }
 }
@@ -672,14 +723,15 @@ void enemy_damage_check(GameData &gameData,
         }
     }
 }
-void ship_heal_check(int n, vector<Dart> &dart, vector<Striker> &striker,
-                     vector<Wraith> &wraith, vector<Banshee> &banshee, SpaceShip &spaceship)
+// checks if any enemy hits the ship
+bool collision(int n, vector<Dart> &dart, vector<Striker> &striker,
+               vector<Wraith> &wraith, vector<Banshee> &banshee, SpaceShip &spaceship)
 {
     for (auto &enemy : dart)
     {
         if (enemy.D_coordinate[0][0] == n - 1 && enemy.D_coordinate[0][1] == spaceship.ship_y)
         {
-            spaceship.heal--;
+            return true;
         }
     }
 
@@ -689,7 +741,7 @@ void ship_heal_check(int n, vector<Dart> &dart, vector<Striker> &striker,
         {
             if (enemy.S_coordinate[s][0] == n - 1 && enemy.S_coordinate[s][1] == spaceship.ship_y)
             {
-                spaceship.heal--;
+                return true;
             }
         }
     }
@@ -700,7 +752,7 @@ void ship_heal_check(int n, vector<Dart> &dart, vector<Striker> &striker,
         {
             if (enemy.W_coordinate[w][0] == n - 1 && enemy.W_coordinate[w][1] == spaceship.ship_y)
             {
-                spaceship.heal--;
+                return true;
             }
         }
     }
@@ -711,10 +763,18 @@ void ship_heal_check(int n, vector<Dart> &dart, vector<Striker> &striker,
         {
             if (enemy.B_coordinate[b][0] == n - 1 && enemy.B_coordinate[b][1] == spaceship.ship_y)
             {
-                spaceship.heal--;
+                return true;
             }
         }
     }
+    return false;
+}
+// decreases ship heap in the case of a collision
+void ship_heal_check(int n, vector<Dart> &dart, vector<Striker> &striker,
+                     vector<Wraith> &wraith, vector<Banshee> &banshee, SpaceShip &spaceship)
+{
+    if (collision(n, dart, striker, wraith, banshee, spaceship))
+        spaceship.heal--;
 }
 
 bool shipStatus(SpaceShip &spaceShip)
@@ -742,7 +802,7 @@ void refresh(GameData &gameData, vector<Dart> &dart, vector<Striker> &striker,
     new_bullet_maker(bullets, spaceship, n);
     move_enemies_down(dart, striker, wraith, banshee);
     ship_heal_check(n, dart, striker, wraith, banshee, spaceship);
-    enemy_outOFBound(gameData, n, dart, striker, wraith, banshee);
+    removeAndReSpawnEnemy(spaceship, gameData, n, dart, striker, wraith, banshee);
     enemy_heal_check(dart, striker, wraith, banshee, bullets);
     enemy_damage_check(gameData, dart, striker, wraith, banshee, bullets, n);
     move_bullets(bullets);
