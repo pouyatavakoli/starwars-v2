@@ -116,8 +116,7 @@ void enemy_damage_check(GameData &gameData,
                         vector<Dart> &dart, vector<Striker> &striker,
                         vector<Wraith> &wraith, vector<Banshee> &banshee,
                         vector<Bullet> &bullets, int n);
-void ship_heal_check(int n, vector<Dart> &dart, vector<Striker> &striker,
-                     vector<Wraith> &wraith, vector<Banshee> &banshee, SpaceShip &spaceship);
+
 bool shipStatus(SpaceShip &spaceShip);
 
 void update_level(GameData &gameData);
@@ -503,6 +502,7 @@ void removeAndReSpawnEnemy(SpaceShip &spaceship, GameData &gameData, int n, vect
             {
                 dart.pop_back();
                 coordinates(n, dart, striker, wraith, banshee, gameData);
+                spaceship.heal--;
             }
         }
     }
@@ -515,6 +515,7 @@ void removeAndReSpawnEnemy(SpaceShip &spaceship, GameData &gameData, int n, vect
             {
                 striker.pop_back();
                 coordinates(n, dart, striker, wraith, banshee, gameData);
+                spaceship.heal--;
             }
         }
     }
@@ -527,6 +528,7 @@ void removeAndReSpawnEnemy(SpaceShip &spaceship, GameData &gameData, int n, vect
             {
                 wraith.pop_back();
                 coordinates(n, dart, striker, wraith, banshee, gameData);
+                spaceship.heal--;
             }
         }
     }
@@ -539,6 +541,7 @@ void removeAndReSpawnEnemy(SpaceShip &spaceship, GameData &gameData, int n, vect
             {
                 banshee.pop_back();
                 coordinates(n, dart, striker, wraith, banshee, gameData);
+                spaceship.heal--;
             }
         }
     }
@@ -769,13 +772,6 @@ bool collision(int n, vector<Dart> &dart, vector<Striker> &striker,
     }
     return false;
 }
-// decreases ship heap in the case of a collision
-void ship_heal_check(int n, vector<Dart> &dart, vector<Striker> &striker,
-                     vector<Wraith> &wraith, vector<Banshee> &banshee, SpaceShip &spaceship)
-{
-    if (collision(n, dart, striker, wraith, banshee, spaceship))
-        spaceship.heal--;
-}
 
 bool shipStatus(SpaceShip &spaceShip)
 {
@@ -801,7 +797,6 @@ void refresh(GameData &gameData, vector<Dart> &dart, vector<Striker> &striker,
     enemy_damage_check(gameData, dart, striker, wraith, banshee, bullets, n);
     new_bullet_maker(bullets, spaceship, n);
     move_enemies_down(dart, striker, wraith, banshee);
-    ship_heal_check(n, dart, striker, wraith, banshee, spaceship);
     removeAndReSpawnEnemy(spaceship, gameData, n, dart, striker, wraith, banshee);
     enemy_heal_check(dart, striker, wraith, banshee, bullets);
     enemy_damage_check(gameData, dart, striker, wraith, banshee, bullets, n);
