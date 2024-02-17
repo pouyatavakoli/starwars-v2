@@ -17,7 +17,6 @@
 #define WHITE "\033[37m"
 #define BRIGHT_GREEN "\033[92m"
 
-
 using namespace std;
 
 // struct for saving game data
@@ -28,6 +27,7 @@ struct GameData
     int points_updater = 0;
     int killCounter = 0;
     int targetScore = 0;
+    string gameResult = "undefined";
 };
 
 // struct for saving enemy details
@@ -141,8 +141,8 @@ void menu(int situation)
 
     switch (situation)
     {
-    case 1:    // Starting  game menu
-        
+    case 1: // Starting  game menu
+
         cout << "1 - Start new game" << endl
              << "2 - Continue previous game" << endl
              << "3 - Exit" << endl;
@@ -158,7 +158,7 @@ void menu(int situation)
             system("pause");
         }
         break;
-    case 2:    // Pause game menu
+    case 2: // Pause game menu
 
         cout << "1 - Resume game" << endl
              << "2 - Change spaceship" << endl
@@ -831,9 +831,11 @@ int startGame()
     if (gameData.point >= gameData.targetScore)
     {
         cout << GREEN_TEXT << "we have a WINNER" << RESET_TEXT << endl;
+        gameData.gameResult = "win";
         return 0;
     }
     cout << RED_TEXT << "Game Over" << RESET_TEXT << endl;
+    gameData.gameResult = "loose";
     system("pause");
     return 0;
 }
@@ -848,62 +850,58 @@ void gameSaver(const int n, const GameData &gameData, const vector<Bullet> &bull
     ofstream file("gameData.txt");
     if (file.is_open())
     {
-        file << "n: " << n << "\n";
-        file << "targetScore: " << gameData.targetScore << "\n";
-        file << "spaceship: " << spaceship.shape << "\n";
+        file << gameData.gameResult << " "; // win / loose / undefined
+        file << n << " ";
+        file << gameData.level << " ";
+        file << gameData.point << " ";
+        file << gameData.killCounter << " ";
+        file << gameData.targetScore << " ";
+        file << spaceship.shape << "\n";
+
         file << "bullets:\n";
         /*for (const auto& bullet : bullets) {
             file << "\t" << "Bullet \n";
         }*/
 
-        file << "darts:\n";
+        if (!dart.empty())
+            file << "dart\n";
         for (const auto &dart : dart)
         {
 
-            file << dart.D_coordinate[0][0] << "\t"
-                 << dart.D_coordinate[0][1] << "\n";
+            file << dart.D_coordinate[0][0] << " "
+                 << dart.D_coordinate[0][1] << " ";
         }
-        file << endl
-             << endl;
 
-        file << "strikers:\n";
+        if (!striker.empty())
+            file << "striker\n";
         for (const auto &striker : striker)
         {
             for (int i = 0; i < 4; i++)
             {
-                file << striker.S_coordinate[i][0] << "\t"
-                     << striker.S_coordinate[i][1] << "\n";
+                file << striker.S_coordinate[i][0] << " "
+                     << striker.S_coordinate[i][1] << " ";
             }
         }
-        file << endl
-             << endl;
-        file << "wraiths:\n";
+        if (!wraith.empty())
+            file << "wraith\n";
         for (const auto &wraith : wraith)
         {
             for (int i = 0; i < 9; i++)
             {
-                file << wraith.W_coordinate[i][0] << "\t"
-                     << wraith.W_coordinate[i][1] << "\n";
+                file << wraith.W_coordinate[i][0] << " "
+                     << wraith.W_coordinate[i][1] << " ";
             }
         }
-        file << endl
-             << endl;
-
-        file << "banshees:\n";
+        if (!banshee.empty())
+            file << "banshee\n";
         for (const auto &banshee : banshee)
         {
             for (int i = 0; i < 16; i++)
             {
-                file << banshee.B_coordinate[i][0] << "\t"
-                     << banshee.B_coordinate[i][1] << "\n";
+                file << banshee.B_coordinate[i][0] << " "
+                     << banshee.B_coordinate[i][1] << " ";
             }
         }
-        file << endl
-             << endl;
-
-        file << "gameData: "
-             << "\n";
-        // add gameData here
         file.close();
     }
     else
