@@ -17,10 +17,6 @@
 #define WHITE "\033[37m"
 #define BRIGHT_GREEN "\033[92m"
 
-#define up_key 72
-#define down_key 80
-#define left_key 75
-#define right_key 77
 
 using namespace std;
 
@@ -64,7 +60,7 @@ struct Banshee
     int size = 4 * 4;
     int heal = 6;
     int count = 0;
-    int B_coordinate[16][4];
+    int B_coordinate[16][2];
 };
 
 // struct for saving spaceship types details
@@ -145,11 +141,11 @@ void menu(int situation)
 
     switch (situation)
     {
-    case 1:
-        // Start new game menu
-        cout << "1 - start new game" << endl
-             << "2 - change game mode" << endl
-             << "3 - quit game" << endl;
+    case 1:    // Starting  game menu
+        
+        cout << "1 - Start new game" << endl
+             << "2 - Continue previous game" << endl
+             << "3 - Exit" << endl;
         int userInput;
         cin >> userInput;
         if (userInput == 1)
@@ -162,21 +158,22 @@ void menu(int situation)
             system("pause");
         }
         break;
-    case 2:
-        // Resume game menu
+    case 2:    // Pause game menu
 
-        cout << "1 - resume game" << endl
-             << "2 - save game" << endl
-             << "3 - quit menu" << endl;
+        cout << "1 - Resume game" << endl
+             << "2 - Change spaceship" << endl
+             << "3 - Quit" << endl;
         userInput = getch();
         if (userInput == 1)
             cout << "game saved";
         // save game function
         break;
     case 3:
-        // Change game settings menu
-        cout << "1 - change game difficulty" << endl
-             << "2 - change winning score" << endl;
+        // Change spaceship menu
+        cout << "1 - Celestia" << endl
+             << "2 - Quantom" << endl
+             << "3 - Stellaris" << endl
+             << "4 - Exit" << endl;
         break;
     default:
         cout << "Invalid situation" << endl;
@@ -425,7 +422,7 @@ bool enemy_outOFBound(const int n, const vector<Dart> &dart, const vector<Strike
 
     for (const auto &enemy : wraith)
     {
-        if (enemy.W_coordinate[8][0] == n)
+        if (enemy.W_coordinate[7][0] == n)
         {
             return true;
         }
@@ -452,8 +449,8 @@ void removeAndReSpawnEnemy(SpaceShip &spaceship, GameData &gameData, int n, vect
             if (enemy.heal > 0)
             {
                 dart.pop_back();
-                coordinates(n, dart, striker, wraith, banshee, gameData);
                 spaceship.heal--;
+                coordinates(n, dart, striker, wraith, banshee, gameData);
             }
         }
     }
@@ -465,8 +462,8 @@ void removeAndReSpawnEnemy(SpaceShip &spaceship, GameData &gameData, int n, vect
             if (enemy.heal > 0)
             {
                 striker.pop_back();
-                coordinates(n, dart, striker, wraith, banshee, gameData);
                 spaceship.heal--;
+                coordinates(n, dart, striker, wraith, banshee, gameData);
             }
         }
     }
@@ -478,8 +475,8 @@ void removeAndReSpawnEnemy(SpaceShip &spaceship, GameData &gameData, int n, vect
             if (enemy.heal > 0)
             {
                 wraith.pop_back();
-                coordinates(n, dart, striker, wraith, banshee, gameData);
                 spaceship.heal--;
+                coordinates(n, dart, striker, wraith, banshee, gameData);
             }
         }
     }
@@ -491,8 +488,8 @@ void removeAndReSpawnEnemy(SpaceShip &spaceship, GameData &gameData, int n, vect
             if (enemy.heal > 0)
             {
                 banshee.pop_back();
-                coordinates(n, dart, striker, wraith, banshee, gameData);
                 spaceship.heal--;
+                coordinates(n, dart, striker, wraith, banshee, gameData);
             }
         }
     }
@@ -758,6 +755,8 @@ void refresh(GameData &gameData, vector<Dart> &dart, vector<Striker> &striker,
 
 int startGame()
 {
+    system("cls");
+
     int n;
     SpaceShip spaceship;
     vector<Bullet> bullets;
@@ -810,8 +809,9 @@ int startGame()
         {
             refresh(gameData, darts, strikers, wraiths, banshees, bullets, spaceship, n);
         }
-        else if (move == 'm' || 'M')
+        else if (move == 'm' || move == 'M')
         {
+            system("cls");
             menu(2);
         }
         else if (move == 'q' || move == 'Q')
@@ -822,7 +822,7 @@ int startGame()
         }
         else
         {
-            cout << "invalid input";
+            cout << "invalid input" << endl;
             system("pause");
         }
         printMap(n, spaceship, darts, strikers, wraiths, banshees, bullets);
