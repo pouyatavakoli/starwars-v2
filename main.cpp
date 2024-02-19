@@ -86,7 +86,7 @@ void saveEnemies();
 void coordinates(const int n, vector<Dart> &dart, vector<Striker> &striker,
                  vector<Wraith> &wraith, vector<Banshee> &banshee, GameData &gameData);
 // function to save all game data
-void gameSaver(const int n, const GameData &gameData, const vector<Bullet> &bullets, const vector<Dart> &dart, const vector<Striker> &striker,
+void gameSaver(const int n, const GameData &gameData,  vector<Bullet> &bullets, const vector<Dart> &dart, const vector<Striker> &striker,
                const vector<Wraith> &wraith, const vector<Banshee> &banshee, const SpaceShip &spaceship);
 
 // function to initialize the game
@@ -843,7 +843,7 @@ void initializeGame()
 {
 }
 
-void gameSaver(const int n, const GameData &gameData, const vector<Bullet> &bullets, const vector<Dart> &dart, const vector<Striker> &striker,
+void gameSaver(const int n, const GameData &gameData, vector<Bullet> &bullets, const vector<Dart> &dart, const vector<Striker> &striker,
                const vector<Wraith> &wraith, const vector<Banshee> &banshee, const SpaceShip &spaceship)
 {
 
@@ -857,11 +857,6 @@ void gameSaver(const int n, const GameData &gameData, const vector<Bullet> &bull
         file << gameData.killCounter << " ";
         file << gameData.targetScore << " ";
         file << spaceship.shape << "\n";
-
-        file << "bullets:\n";
-        /*for (const auto& bullet : bullets) {
-            file << "\t" << "Bullet \n";
-        }*/
 
         if (!dart.empty())
             file << "dart\n";
@@ -901,6 +896,16 @@ void gameSaver(const int n, const GameData &gameData, const vector<Bullet> &bull
                 file << banshee.B_coordinate[i][0] << " "
                      << banshee.B_coordinate[i][1] << " ";
             }
+        }
+
+        file << endl;
+        bullets.shrink_to_fit();
+
+        bullets.shrink_to_fit();
+        for (const auto &bullet : bullets)
+        {
+                file << bullet.coordinate[0][0]<< " " << bullet.coordinate[0][1] << " ";
+            
         }
         file.close();
     }
