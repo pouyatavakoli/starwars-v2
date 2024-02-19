@@ -16,6 +16,12 @@
 #define BRIGHT_WHITE "\033[97m"
 #define WHITE "\033[37m"
 #define BRIGHT_GREEN "\033[92m"
+#define BRIGHT_CYAN "\u001b[36;1m"
+#define BRIGHT_RED "\u001b[31;1m"
+#define BRIGHT_YELLOW "\u001b[33;1m"
+#define BRIGHT_MAGENTA "\u001b[35;1m"
+#define BRIGHT_BLACK "\u001b[30;1m"
+
 
 using namespace std;
 
@@ -210,6 +216,10 @@ void printMap(int n,
                 bool isSpaceShip = false;
                 bool isEnemy = false;
                 bool isBullet = false;
+                bool isDart = false;
+                bool isStriker = false;
+                bool isWraith = false;
+                bool isBanshee = false;
                 for (int s = 0; s < n - 1; s++)
                 {
                     if (i == n - 1 && k == spaceship.ship_y)
@@ -220,6 +230,7 @@ void printMap(int n,
                 {
                     if (i == enemy.D_coordinate[0][0] && k == enemy.D_coordinate[0][1])
                         isEnemy = true;
+                        isDart = true;
                 }
 
                 for (const auto &enemy : striker)
@@ -228,6 +239,7 @@ void printMap(int n,
                     {
                         if (i == enemy.S_coordinate[s][0] && k == enemy.S_coordinate[s][1])
                             isEnemy = true;
+                            isStriker = true;
                     }
                 }
 
@@ -237,6 +249,7 @@ void printMap(int n,
                     {
                         if (i == enemy.W_coordinate[w][0] && k == enemy.W_coordinate[w][1])
                             isEnemy = true;
+                            isWraith = true;
                     }
                 }
 
@@ -246,6 +259,7 @@ void printMap(int n,
                     {
                         if (i == enemy.B_coordinate[b][0] && k == enemy.B_coordinate[b][1])
                             isEnemy = true;
+                            isBanshee = true;
                     }
                 }
 
@@ -262,15 +276,29 @@ void printMap(int n,
                 }
                 else if (isEnemy)
                 {
-                    cout << "| " << RED_TEXT << "* " << RESET_TEXT;
+                    if(isDart == true)
+                    cout << "| " << BRIGHT_CYAN << "* " << RESET_TEXT;
+
+                    else if (isStriker == true)
+                    {
+                        cout << "| " << BRIGHT_YELLOW << "* " << RESET_TEXT;
+                    }
+                    else if (isWraith == true)
+                    {
+                    cout << "| " << BRIGHT_RED << "* " << RESET_TEXT;
+                    }
+                    else if(isBanshee == true)
+                    {
+                    cout << "| " << BRIGHT_MAGENTA << "* " << RESET_TEXT;  
+                    }  
                 }
                 else if (isBullet)
                 {
-                    cout << "| " << YELLOW_TEXT << "^ " << RESET_TEXT; // The symbol for Bullet
+                    cout << "| " << BRIGHT_BLACK << "^ " << RESET_TEXT; // The symbol for Bullet
                 }
                 else
                 {
-                    cout << "|   ";
+                    cout << BRIGHT_WHITE << "|   " << RESET_TEXT ;
                 }
             }
         }
@@ -774,8 +802,15 @@ int startGame(int x)
     GameData gameData;
     if (x == 1)
     {
-    cout << "n : ";
+    cout << "Size of map : ";
     cin >> n;
+    while (n < 16)
+    {
+        system("cls");
+        cout << "The size of map can't be less than 16." << endl;
+        cout << "Size of mao :" ;
+        cin >> n;
+    }
     cout << "What's your target score : ";
     cin >> gameData.targetScore;
     if (n % 2 == 0)
@@ -802,15 +837,19 @@ int startGame(int x)
        {
         system("cls");
         cout << GREEN_TEXT <<"You have WON the last game!" << RESET_TEXT << endl;
+        cout << "In order to go to main menu : ";
         system("pause");
-        startGame(1);
+        system("cls");
+        menu(1);
        }
        else if(result == 0)
        {
         system("cls");
         cout << RED_TEXT << "You have LOST the last game!" << RESET_TEXT << endl;
+        cout << "In order to go to main menu : ";
         system("pause");
-        startGame(1);
+        system("cls");
+        menu(1);
        }
        else if (result == 2)
        {
@@ -819,13 +858,14 @@ int startGame(int x)
        }
     }
 
-    printMap(n, spaceship, darts, strikers, wraiths, banshees, bullets);
+     printMap(n, spaceship, darts, strikers, wraiths, banshees, bullets);
 
     char move;
     while (shipStatus(spaceship) && gameData.point < gameData.targetScore)
     {
         cout << "use arrow keys to move left or right : " << endl
              << "press m to open menu " << endl;
+        cout << "Size of map : " << n << endl;
         cout << CYAN << "Level : " << gameData.level << RESET_TEXT << endl;
         cout << BRIGHT_WHITE << "point : " << WHITE << gameData.point << " / " << gameData.targetScore << RESET_TEXT << endl;
         cout << BRIGHT_GREEN << "heal  : " << GREEN_TEXT << spaceship.heal << RESET_TEXT << endl;
@@ -835,12 +875,12 @@ int startGame(int x)
             move_left(spaceship, n);
             refresh(gameData, darts, strikers, wraiths, banshees, bullets, spaceship, n);
         }
-        else if (move == 'd')
+        else if (move == 'd' || move == 'D')
         {
             move_right(spaceship, n);
             refresh(gameData, darts, strikers, wraiths, banshees, bullets, spaceship, n);
         }
-        else if (move == 'w')
+        else if (move == 'w' || move == 'W')
         {
             refresh(gameData, darts, strikers, wraiths, banshees, bullets, spaceship, n);
         }
@@ -852,7 +892,7 @@ int startGame(int x)
         else if (move == 'q' || move == 'Q')
         {
             system("cls");
-            cout << "you quitted the game";
+            menu(2);
             return 0;
         }
         else
@@ -890,6 +930,7 @@ void gameSaver(const int n, const GameData &gameData, vector<Bullet> &bullets, c
         file << gameData.level << " ";
         file << gameData.point << " ";
         file << spaceship.ship_y << " ";
+        file << spaceship.heal << " ";
         file << gameData.killCounter << " ";
         file << gameData.targetScore << " ";
         file << spaceship.shape << "\n";
@@ -897,14 +938,14 @@ void gameSaver(const int n, const GameData &gameData, vector<Bullet> &bullets, c
         if (!dart.empty())
             file << "dart\n";
         for (const auto &dart : dart)
-        {
-
+        { 
             file << dart.D_coordinate[0][0] << " "
                  << dart.D_coordinate[0][1] << " ";
         }
 
         if (!striker.empty())
             file << "striker\n";
+
         for (const auto &striker : striker)
         {
             for (int i = 0; i < 4; i++)
@@ -935,7 +976,6 @@ void gameSaver(const int n, const GameData &gameData, vector<Bullet> &bullets, c
         }
 
         file << endl;
-        bullets.shrink_to_fit();
 
         bullets.shrink_to_fit();
         for (const auto &bullet : bullets)
@@ -970,7 +1010,7 @@ int gameLoader( int &n, GameData &gameData, vector<Bullet> &bullets,
         }
         else if (gameData.gameResult == "undefined")
         {
-        file >> n >> gameData.level >> gameData.point >> spaceship.ship_y >> gameData.killCounter >> gameData.targetScore >> spaceship.shape ;
+        file >> n >> gameData.level >> gameData.point >> spaceship.ship_y >> spaceship.heal >> gameData.killCounter >> gameData.targetScore >> spaceship.shape ;
         string enemyType;
         file >> enemyType;
         
