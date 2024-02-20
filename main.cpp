@@ -85,7 +85,7 @@ struct Bullet
 };
 
 // main menu
-void menu(int);
+int menu(int);
 // function to save enemies data in file
 void saveEnemies();
 // checking enemy coordinates.
@@ -141,11 +141,13 @@ int startGame(int x);
 int main()
 {
     menu(1);
+
 }
 
 // menu that can be different in each situation
-void menu(int situation)
+int menu(int situation)
 {
+    system("cls");
     cout << "Choose what you want to do" << endl;
 
     switch (situation)
@@ -155,20 +157,21 @@ void menu(int situation)
         cout << "1 - Start new game" << endl
              << "2 - Continue previous game" << endl
              << "3 - Exit" << endl;
-        int userInput;
-        cin >> userInput;
-        if (userInput == 1)
+        char userInput;    
+        userInput = getch();
+        if (userInput == '1')
         {
             startGame(1);
         }
-        else if (userInput == 2)
+        else if (userInput == '2')
         {
             startGame(2);
         }
-        else if (userInput == 3)
+        else if (userInput == '3')
         {
-            cout << "You quitted the game";
+            cout << "You quitted the game" << endl;
             system("pause");
+            exit(0);
         }
         break;
     case 2: // Pause game menu
@@ -177,9 +180,17 @@ void menu(int situation)
              << "2 - Change spaceship" << endl
              << "3 - Quit" << endl;
         userInput = getch();
-        if (userInput == 1)
-            cout << "game saved";
-        // save game function
+        if (userInput == '1')
+        {
+            // Nothing happens.
+        }
+            
+        //else if (userInput == 2)
+        else if (userInput == '3')
+        {
+            system("cls");
+            menu(1);
+        }
         break;
     case 3:
         // Change spaceship menu
@@ -858,10 +869,11 @@ int startGame(int x)
        }
     }
 
-     printMap(n, spaceship, darts, strikers, wraiths, banshees, bullets);
+    printMap(n, spaceship, darts, strikers, wraiths, banshees, bullets);
 
+    bool continue_game = true;
     char move;
-    while (shipStatus(spaceship) && gameData.point < gameData.targetScore)
+    while (shipStatus(spaceship) && continue_game)
     {
         cout << "use arrow keys to move left or right : " << endl
              << "press m to open menu " << endl;
@@ -870,7 +882,7 @@ int startGame(int x)
         cout << BRIGHT_WHITE << "point : " << WHITE << gameData.point << " / " << gameData.targetScore << RESET_TEXT << endl;
         cout << BRIGHT_GREEN << "heal  : " << GREEN_TEXT << spaceship.heal << RESET_TEXT << endl;
         move = getch();
-        if (move == 'a')
+        if (move == 'a' || move == 'A')
         {
             move_left(spaceship, n);
             refresh(gameData, darts, strikers, wraiths, banshees, bullets, spaceship, n);
@@ -889,33 +901,40 @@ int startGame(int x)
             system("cls");
             menu(2);
         }
-        else if (move == 'q' || move == 'Q')
-        {
-            system("cls");
-            menu(2);
-            return 0;
-        }
         else
         {
             cout << "invalid input" << endl;
             system("pause");
         }
-        printMap(n, spaceship, darts, strikers, wraiths, banshees, bullets);
-    }
-    system("cls");
+        system("cls");
     if (gameData.point >= gameData.targetScore)
     {
         cout << GREEN_TEXT << "we have a WINNER" << RESET_TEXT << endl;
-        gameData.gameResult = "win";
-        return 0;
+        cout << "Do you want to continue the game ? Y / N "; 
+        char continue_game;
+        continue_game = getch();
+        if (continue_game == 'y' || continue_game == 'Y')
+        {
+            gameData.targetScore += 100;
+            continue_game= true;
+        }
+        else if (continue_game == 'n' || continue_game == 'N'){
+            continue_game = false;
+            gameData.gameResult = "win";
+            menu(1);
+        }
     }
-    cout << RED_TEXT << "Game Over" << RESET_TEXT << endl;
-    gameData.gameResult = "loose";
-    system("pause");
-    return 0;
-}
-void initializeGame()
-{
+        printMap(n, spaceship, darts, strikers, wraiths, banshees, bullets);
+    }
+    
+    system("cls");
+    if(shipStatus(spaceship) == false)
+    {
+        cout << RED_TEXT << "we have a LOOSER" << RESET_TEXT << endl;
+        gameData.gameResult = "loose";
+        system("pause");
+        menu(1);
+    }
 }
 
 void gameSaver(const int n, const GameData &gameData, vector<Bullet> &bullets, const vector<Dart> &dart, const vector<Striker> &striker,
