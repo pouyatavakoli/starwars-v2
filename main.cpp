@@ -128,6 +128,8 @@ bool shipStatus(SpaceShip &spaceShip);
 // score based leveling system
 void update_level(GameData &gameData);
 // game movements and updates info
+bool ref2 (vector<Dart> &dart, vector<Striker> &striker,
+             vector<Wraith> &wraith, vector<Banshee> &banshee);
 void refresh(GameData &gameData,
              vector<Dart> &dart, vector<Striker> &striker, vector<Wraith> &wraith, vector<Banshee> &banshee,
              vector<Bullet> &bullets,
@@ -960,18 +962,61 @@ void update_level(GameData &gameData)
     }
 }
 
+bool ref2 ( vector<Dart> &dart, vector<Striker> &striker,
+             vector<Wraith> &wraith, vector<Banshee> &banshee)
+{
+    if(!dart.empty()) 
+    {
+        for (const auto &dart : dart)
+        {
+            if (dart.heal <= 0)
+            return true;
+        }
+    } 
+    else if(!striker.empty()) 
+    {
+        for (const auto &striker : striker)
+        {
+            if (striker.heal <= 0)
+            return true;
+        }
+    }
+    else if(!wraith.empty()) 
+    {
+        for (const auto &wraith : wraith)
+        {
+            if (wraith.heal <= 0)
+            return true;
+        }
+    }  
+    else if(!banshee.empty()) 
+    {
+        for (const auto &banshee: banshee)
+        {
+            if (banshee.heal <= 0)
+            return true;
+        }
+    }
+
+    return false;
+}             
+
 void refresh(GameData &gameData, vector<Dart> &dart, vector<Striker> &striker,
              vector<Wraith> &wraith, vector<Banshee> &banshee,
              vector<Bullet> &bullets, SpaceShip &spaceship, int n)
 {
-    move_enemies_down(dart, striker, wraith, banshee);
-    new_bullet_maker(bullets, spaceship, n);
-    move_bullets(bullets);
-    // reduce enemy heal when shot
     enemy_heal_check(dart, striker, wraith, banshee, bullets);
-    // remove and ReSpawn enemy if heal = 0
+    bool result_of_distruction = ref2(dart , striker , wraith , banshee);
     enemy_damage_check(gameData, dart, striker, wraith, banshee, bullets, n);
+    new_bullet_maker(bullets, spaceship, n);
+    if(result_of_distruction == false)
+    {
+        move_enemies_down(dart, striker, wraith, banshee);    
+    }
     removeAndReSpawnEnemy(spaceship, gameData, n, dart, striker, wraith, banshee);
+    enemy_heal_check(dart, striker, wraith, banshee, bullets);
+    enemy_damage_check(gameData, dart, striker, wraith, banshee, bullets, n);
+    move_bullets(bullets);
     update_level(gameData);
     gameSaver(n, gameData, bullets, dart, striker, wraith, banshee, spaceship);
 }
