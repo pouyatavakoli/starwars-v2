@@ -86,8 +86,8 @@ struct Bullet
 // main menu
 int menu(int);
 int startGame(int x);
-// create new enemy coordinates
-void coordinates(const int n, vector<Dart> &dart, vector<Striker> &striker,
+// create new enemy Enemy_coordinate_maker
+void Enemy_coordinate_maker(const int n, vector<Dart> &dart, vector<Striker> &striker,
                  vector<Wraith> &wraith, vector<Banshee> &banshee, GameData &gameData);
 // function to save all game data
 void new_bullet_maker(vector<Bullet> &bullets, SpaceShip &spaceship, int n);
@@ -183,12 +183,15 @@ int menu(int situation)
             system("pause");
             exit(0);
         }
+        else
+        {
+            menu(1);
+        }
         break;
     case 2: // Pause game menu
 
         cout << "1 - Resume game" << endl
-             << "2 - Change spaceship" << endl
-             << "3 - Quit" << endl;
+             << "2 - Quit" << endl;
         userInput = getch();
         if (userInput == '1')
         {
@@ -196,19 +199,17 @@ int menu(int situation)
         }
 
         // else if (userInput == 2)
-        else if (userInput == '3')
+        else if (userInput == '2')
         {
             system("cls");
             menu(1);
         }
+        else
+        {
+            menu(2);
+        }
         break;
-    case 3:
-        // Change spaceship menu
-        cout << "1 - Celestia" << endl
-             << "2 - Quantom" << endl
-             << "3 - Stellaris" << endl
-             << "4 - Exit" << endl;
-        break;
+
     default:
         cout << "Invalid situation" << endl;
         break;
@@ -254,7 +255,7 @@ int startGame(int x)
 
             spaceship.ship_y = n / 2;
 
-        coordinates(n, darts, strikers, wraiths, banshees, gameData);
+        Enemy_coordinate_maker(n, darts, strikers, wraiths, banshees, gameData);
     }
 
     else if (x == 2)
@@ -358,8 +359,8 @@ int startGame(int x)
     return 0;
 }
 
-// create new enemy coordinates
-void coordinates(int n, vector<Dart> &dart, vector<Striker> &striker,
+// create new enemy Enemy_coordinate_maker
+void Enemy_coordinate_maker(int n, vector<Dart> &dart, vector<Striker> &striker,
                  vector<Wraith> &wraith, vector<Banshee> &banshee, GameData &gameData)
 {
     // pick a random enemy type between 4 types
@@ -663,7 +664,7 @@ void removeAndReSpawnEnemy(SpaceShip &spaceship, GameData &gameData, int n, vect
             {
                 dart.pop_back();
                 spaceship.heal--;
-                coordinates(n, dart, striker, wraith, banshee, gameData);
+                Enemy_coordinate_maker(n, dart, striker, wraith, banshee, gameData);
             }
         }
     }
@@ -676,7 +677,7 @@ void removeAndReSpawnEnemy(SpaceShip &spaceship, GameData &gameData, int n, vect
             {
                 striker.pop_back();
                 spaceship.heal--;
-                coordinates(n, dart, striker, wraith, banshee, gameData);
+                Enemy_coordinate_maker(n, dart, striker, wraith, banshee, gameData);
             }
         }
     }
@@ -689,7 +690,7 @@ void removeAndReSpawnEnemy(SpaceShip &spaceship, GameData &gameData, int n, vect
             {
                 wraith.pop_back();
                 spaceship.heal--;
-                coordinates(n, dart, striker, wraith, banshee, gameData);
+                Enemy_coordinate_maker(n, dart, striker, wraith, banshee, gameData);
             }
         }
     }
@@ -702,7 +703,7 @@ void removeAndReSpawnEnemy(SpaceShip &spaceship, GameData &gameData, int n, vect
             {
                 banshee.pop_back();
                 spaceship.heal--;
-                coordinates(n, dart, striker, wraith, banshee, gameData);
+                Enemy_coordinate_maker(n, dart, striker, wraith, banshee, gameData);
             }
         }
     }
@@ -854,7 +855,7 @@ void enemy_damage_check(GameData &gameData,
             gameData.point += 1;
             gameData.points_updater += 1;
             gameData.killCounter++;
-            coordinates(n, dart, striker, wraith, banshee, gameData);
+            Enemy_coordinate_maker(n, dart, striker, wraith, banshee, gameData);
         }
     }
     for (auto &enemy : striker)
@@ -865,7 +866,7 @@ void enemy_damage_check(GameData &gameData,
             gameData.point += 8;
             gameData.points_updater += 8;
             gameData.killCounter++;
-            coordinates(n, dart, striker, wraith, banshee, gameData);
+            Enemy_coordinate_maker(n, dart, striker, wraith, banshee, gameData);
         }
     }
     for (auto &enemy : wraith)
@@ -876,7 +877,7 @@ void enemy_damage_check(GameData &gameData,
             gameData.point += 18;
             gameData.points_updater += 18;
             gameData.killCounter++;
-            coordinates(n, dart, striker, wraith, banshee, gameData);
+            Enemy_coordinate_maker(n, dart, striker, wraith, banshee, gameData);
         }
     }
     for (auto &enemy : banshee)
@@ -887,7 +888,7 @@ void enemy_damage_check(GameData &gameData,
             gameData.point += 32;
             gameData.points_updater += 32;
             gameData.killCounter++;
-            coordinates(n, dart, striker, wraith, banshee, gameData);
+            Enemy_coordinate_maker(n, dart, striker, wraith, banshee, gameData);
         }
     }
 }
@@ -1000,6 +1001,7 @@ void gameSaver(const int n, const GameData &gameData, vector<Bullet> &bullets, c
             file << "dart\n";
         for (const auto &dart : dart)
         {
+            file << dart.heal << endl;
             file << dart.D_coordinate[0][0] << " "
                  << dart.D_coordinate[0][1] << " ";
         }
@@ -1009,6 +1011,7 @@ void gameSaver(const int n, const GameData &gameData, vector<Bullet> &bullets, c
 
         for (const auto &striker : striker)
         {
+            file << striker.heal << endl;
             for (int i = 0; i < 4; i++)
             {
                 file << striker.S_coordinate[i][0] << " "
@@ -1019,6 +1022,7 @@ void gameSaver(const int n, const GameData &gameData, vector<Bullet> &bullets, c
             file << "wraith\n";
         for (const auto &wraith : wraith)
         {
+            file << wraith.heal << endl;
             for (int i = 0; i < 9; i++)
             {
                 file << wraith.W_coordinate[i][0] << " "
@@ -1029,6 +1033,7 @@ void gameSaver(const int n, const GameData &gameData, vector<Bullet> &bullets, c
             file << "banshee\n";
         for (const auto &banshee : banshee)
         {
+            file << banshee.heal << endl;
             for (int i = 0; i < 16; i++)
             {
                 file << banshee.B_coordinate[i][0] << " "
@@ -1077,12 +1082,14 @@ int gameLoader(int &n, GameData &gameData, vector<Bullet> &bullets,
             if (enemyType == "dart")
             {
                 Dart newDart;
+                file >> newDart.heal;
                 file >> newDart.D_coordinate[0][0] >> newDart.D_coordinate[0][1];
                 dart.push_back(newDart);
             }
             else if (enemyType == "striker")
             {
                 Striker newStriker;
+                file >> newStriker.heal;
                 for (int i = 0; i < 4; i++)
                 {
                     file >> newStriker.S_coordinate[i][0] >> newStriker.S_coordinate[i][1];
@@ -1092,6 +1099,7 @@ int gameLoader(int &n, GameData &gameData, vector<Bullet> &bullets,
             else if (enemyType == "wraith")
             {
                 Wraith newWraith;
+                file >> newWraith.heal;
                 for (int i = 0; i < 9; i++)
                 {
                     file >> newWraith.W_coordinate[i][0] >> newWraith.W_coordinate[i][1];
@@ -1101,18 +1109,16 @@ int gameLoader(int &n, GameData &gameData, vector<Bullet> &bullets,
             else if (enemyType == "banshee")
             {
                 Banshee newBanshee;
+                file >> newBanshee.heal;
                 for (int i = 0; i < 16; i++)
                 {
                     file >> newBanshee.B_coordinate[i][0] >> newBanshee.B_coordinate[i][1];
                 }
                 banshee.push_back(newBanshee);
             }
-            else
-            {
-                cerr << "Unknown enemy type: " << enemyType << endl;
-            }
 
-            // Read bullet coordinates
+
+            // Read bullet Enemy_coordinate_maker
             Bullet newBullet;
             while (file >> newBullet.coordinate[0][0] >> newBullet.coordinate[0][1])
             {
