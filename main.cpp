@@ -102,6 +102,8 @@ void move_right(SpaceShip &spaceship, int n);
 void move_left(SpaceShip &spaceship, int n);
 
 bool bullet_outOfBound(const Bullet &bullet);
+bool enemy_outOFBound(const int n, const vector<Dart> &dart, const vector<Striker> &striker,
+                      const vector<Wraith> &wraith, const vector<Banshee> &banshee);
 
 void move_bullets(vector<Bullet> &bullets);
 void move_enemies_down(vector<Dart> &dart, vector<Striker> &striker,
@@ -116,6 +118,9 @@ bool isHit(const Banshee &enemy, const Bullet &bullet);
 bool collision(int n,
                vector<Dart> &dart, vector<Striker> &striker, vector<Wraith> &wraith, vector<Banshee> &banshee,
                SpaceShip &spaceship);
+
+void removeAndReSpawnEnemy(SpaceShip &spaceship, GameData &gameData, int n, vector<Dart> &dart, vector<Striker> &striker,
+                           vector<Wraith> &wraith, vector<Banshee> &banshee);
 
 // remove enemy if heal is 0 and update points
 void enemy_damage_check(GameData &gameData,
@@ -282,6 +287,12 @@ int startGame(int x)
             system("cls");
             menu(1);
         }
+        else if (result == -1)
+        {
+            cout << "You have no game saved." << endl;
+            system("pause");
+            menu(1);
+        }
         else if (result == 2)
         {
             cout << "In order to continue : ";
@@ -293,7 +304,7 @@ int startGame(int x)
 
     bool continue_game = true;
     char move;
-    while (shipStatus(spaceship) && continue_game)
+    while (shipStatus(spaceship) && continue_game && gameData.point < gameData.targetScore)
     {
         cout << "use 'a' to move left 'd' to move right press 'w' to shoot : " << endl
              << "press 'm' to open menu " << endl;
@@ -335,8 +346,8 @@ int startGame(int x)
             continue_game = getch();
             if (continue_game == 'y' || continue_game == 'Y')
             {
-                gameData.targetScore += 100;
                 continue_game = true;
+                break;
             }
             else if (continue_game == 'n' || continue_game == 'N')
             {
@@ -346,6 +357,43 @@ int startGame(int x)
                 menu(1);
             }
         }
+        printMap(n, spaceship, darts, strikers, wraiths, banshees, bullets);
+    }
+    printMap(n, spaceship, darts, strikers, wraiths, banshees, bullets);
+    while (shipStatus(spaceship) && continue_game)
+    {
+        cout << "use 'a' to move left 'd' to move right press 'w' to shoot : " << endl
+             << "press 'm' to open menu " << endl;
+        cout << "Size of map : " << n << endl;
+        cout << CYAN << "Level : " << gameData.level << RESET_TEXT << endl;
+        cout << BRIGHT_WHITE << "point : " << WHITE << gameData.point << RESET_TEXT << endl;
+        cout << BRIGHT_GREEN << "heal  : " << GREEN_TEXT << spaceship.heal << RESET_TEXT << endl;
+        move = getch();
+        if (move == 'a' || move == 'A')
+        {
+            move_left(spaceship, n);
+            refresh(gameData, darts, strikers, wraiths, banshees, bullets, spaceship, n);
+        }
+        else if (move == 'd' || move == 'D')
+        {
+            move_right(spaceship, n);
+            refresh(gameData, darts, strikers, wraiths, banshees, bullets, spaceship, n);
+        }
+        else if (move == 'w' || move == 'W')
+        {
+            refresh(gameData, darts, strikers, wraiths, banshees, bullets, spaceship, n);
+        }
+        else if (move == 'm' || move == 'M')
+        {
+            system("cls");
+            menu(2);
+        }
+        else
+        {
+            cout << "invalid input" << endl;
+            system("pause");
+        }
+        system("cls");
         printMap(n, spaceship, darts, strikers, wraiths, banshees, bullets);
     }
 
@@ -773,7 +821,7 @@ bool isHit(const Banshee &enemy, const Bullet &bullet)
 }
 
 /*
- *         enemy heal and removal part
+ *         enemy heal and bullet removal part
  */
 void enemy_heal_check(vector<Dart> &dart, vector<Striker> &striker,
                       vector<Wraith> &wraith, vector<Banshee> &banshee,
