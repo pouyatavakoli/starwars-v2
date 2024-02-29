@@ -236,7 +236,8 @@ int startGame(int x)
     vector<Wraith> wraiths;
     vector<Banshee> banshees;
     GameData gameData;
-    if (x == 1)
+    
+    if (x == 1)  // New game.
     {
         cout << "Size of map : ";
         cin >> n;
@@ -265,7 +266,7 @@ int startGame(int x)
         Enemy_coordinate_maker(n, darts, strikers, wraiths, banshees, gameData);
     }
 
-    else if (x == 2)
+    else if (x == 2) // continue previous game.
     {
         int result = gameLoader(n, gameData, bullets, darts, strikers, wraiths, banshees, spaceship);
 
@@ -303,8 +304,9 @@ int startGame(int x)
     printMap(n, spaceship, darts, strikers, wraiths, banshees, bullets);
 
     bool continue_game = true;
+    bool continue2 = true;
     char move;
-    while (shipStatus(spaceship) && continue_game && gameData.point < gameData.targetScore)
+    while (shipStatus(spaceship) && continue_game && continue2 &&gameData.point < gameData.targetScore)
     {
         cout << "use 'a' to move left 'd' to move right press 'w' to shoot : " << endl
              << "press 'm' to open menu " << endl;
@@ -342,19 +344,31 @@ int startGame(int x)
         {
             cout << GREEN_TEXT << "we have a WINNER" << RESET_TEXT << endl;
             cout << "Do you want to continue the game ? Y / N ";
-            char continue_game;
-            continue_game = getch();
-            if (continue_game == 'y' || continue_game == 'Y')
+
+            while(continue2)
             {
-                continue_game = true;
-                break;
-            }
-            else if (continue_game == 'n' || continue_game == 'N')
-            {
-                continue_game = false;
-                gameData.gameResult = "win";
-                gameSaver(n, gameData, bullets, darts, strikers, wraiths, banshees, spaceship);
-                menu(1);
+                char continue_game;
+                continue_game = getch();
+                if (continue_game == 'y' || continue_game == 'Y')
+                {
+                    continue_game = true;
+                    continue2 = false;
+                    break;
+                }
+                else if (continue_game == 'n' || continue_game == 'N')
+                {
+                    continue_game = false;
+                    gameData.gameResult = "win";
+                    gameSaver(n, gameData, bullets, darts, strikers, wraiths, banshees, spaceship);
+                    menu(1);
+                }
+                else
+                {
+                    system("cls");
+                    cout << "invalid input!!!" << endl 
+                         << "Do you want to continue the game ? Y / N " << endl;
+                }
+
             }
         }
         printMap(n, spaceship, darts, strikers, wraiths, banshees, bullets);
