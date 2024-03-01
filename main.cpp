@@ -123,7 +123,7 @@ bool collision(int n,
                vector<Dart> &dart, vector<Striker> &striker, vector<Wraith> &wraith, vector<Banshee> &banshee,
                SpaceShip &spaceship);
 
-void removeAndReSpawnEnemy(SpaceShip &spaceship, GameData &gameData, int n, vector<Dart> &dart, vector<Striker> &striker,
+void removeAndReSpawnEnemy(SpaceShip &spaceship, GameData &gameData, int n,Dart &dart_st, Striker &striker_st, Wraith &wraith_st, Banshee &banshee_st , vector<Dart> &dart, vector<Striker> &striker,
                            vector<Wraith> &wraith, vector<Banshee> &banshee);
 
 // remove enemy if heal is 0 and update points
@@ -149,14 +149,14 @@ void gameSaver(const int n,
                const GameData &gameData,
                vector<Bullet> &bullets,
                const vector<Dart> &dart, const vector<Striker> &striker, const vector<Wraith> &wraith, const vector<Banshee> &banshee,
-               const SpaceShip &spaceship , const Dart &Dart, const Striker &Striker, const Wraith &Wraith, const Banshee &Banshee);
+               const SpaceShip &spaceship , const  Dart &Dart_st,const Striker &Striker_st, const Wraith &Wraith_st,const Banshee &Banshee_st);
 // read game from file
 int gameLoader(int &n,
                GameData &gameData,
                vector<Bullet> &bullets,
                vector<Dart> &dart, vector<Striker> &striker, vector<Wraith> &wraith, vector<Banshee> &banshee,
                SpaceShip &spaceship , Dart &Dart_st, Striker &Striker_st, Wraith &Wraith_st, Banshee &Banshee_st);
-void summary(Dart &Dart, Striker &Striker, Wraith &Wraith, Banshee &Banshee, GameData &gameData);
+void summary(const Dart &Dart_st, const Striker &Striker_st,const Wraith &Wraith_st,const Banshee &Banshee_st, GameData &gameData);
 
 /*
  *       main function
@@ -727,7 +727,7 @@ bool enemy_outOFBound(const int n, const vector<Dart> &dart, const vector<Strike
 }
 
 // removes the enemy and spawns a new enemy only if enemy is not already killed and removed
-void removeAndReSpawnEnemy(SpaceShip &spaceship, GameData &gameData, int n, vector<Dart> &dart, vector<Striker> &striker,
+void removeAndReSpawnEnemy(SpaceShip &spaceship, GameData &gameData, int n, Dart &dart_st, Striker &striker_st, Wraith &wraith_st, Banshee &banshee_st , vector<Dart> &dart, vector<Striker> &striker,
                            vector<Wraith> &wraith, vector<Banshee> &banshee)
 {
     for (const auto &enemy : dart)
@@ -738,6 +738,8 @@ void removeAndReSpawnEnemy(SpaceShip &spaceship, GameData &gameData, int n, vect
             {
                 dart.pop_back();
                 spaceship.heal--;
+                dart_st.killed++;
+                gameData.killCounter++;
                 Enemy_coordinate_maker(n, dart, striker, wraith, banshee, gameData);
             }
         }
@@ -751,6 +753,8 @@ void removeAndReSpawnEnemy(SpaceShip &spaceship, GameData &gameData, int n, vect
             {
                 striker.pop_back();
                 spaceship.heal--;
+                striker_st.killed++;
+                gameData.killCounter++;
                 Enemy_coordinate_maker(n, dart, striker, wraith, banshee, gameData);
             }
         }
@@ -764,6 +768,8 @@ void removeAndReSpawnEnemy(SpaceShip &spaceship, GameData &gameData, int n, vect
             {
                 wraith.pop_back();
                 spaceship.heal--;
+                wraith_st.killed++;
+                gameData.killCounter++;
                 Enemy_coordinate_maker(n, dart, striker, wraith, banshee, gameData);
             }
         }
@@ -777,6 +783,8 @@ void removeAndReSpawnEnemy(SpaceShip &spaceship, GameData &gameData, int n, vect
             {
                 banshee.pop_back();
                 spaceship.heal--;
+                banshee_st.killed++;
+                gameData.killCounter++;
                 Enemy_coordinate_maker(n, dart, striker, wraith, banshee, gameData);
             }
         }
@@ -1089,7 +1097,7 @@ void refresh(GameData &gameData, vector<Dart> &dart, vector<Striker> &striker,
     {
         move_enemies_down(dart, striker, wraith, banshee);
     }
-    removeAndReSpawnEnemy(spaceship, gameData, n, dart, striker, wraith, banshee);
+    removeAndReSpawnEnemy(spaceship, gameData, n, dart_st, striker_st, wraith_st, banshee_st, dart, striker, wraith, banshee);
     enemy_heal_check(dart, striker, wraith, banshee, bullets);
     enemy_damage_check(gameData, dart_st, striker_st, wraith_st, banshee_st, dart, striker, wraith, banshee, bullets, n);
     move_bullets(bullets);
@@ -1102,7 +1110,7 @@ void refresh(GameData &gameData, vector<Dart> &dart, vector<Striker> &striker,
  */
 
 void gameSaver(const int n, const GameData &gameData, vector<Bullet> &bullets, const vector<Dart> &dart, const vector<Striker> &striker,
-               const vector<Wraith> &wraith, const vector<Banshee> &banshee, const SpaceShip &spaceship , const Dart &Dart, const Striker &Striker, const Wraith &Wraith, const Banshee &Banshee)
+               const vector<Wraith> &wraith, const vector<Banshee> &banshee, const SpaceShip &spaceship , const Dart &Dart_st, const Striker &Striker_st, const Wraith &Wraith_st, const Banshee &Banshee_st)
 {
 
     ofstream file("gameData.txt");
@@ -1117,6 +1125,11 @@ void gameSaver(const int n, const GameData &gameData, vector<Bullet> &bullets, c
         file << gameData.killCounter << " ";
         file << gameData.targetScore << " ";
         file << spaceship.shape << "\n";
+
+        file << Dart_st.killed << " ";
+        file << Striker_st.killed << " ";
+        file << Wraith_st.killed << " ";
+        file << Banshee_st.killed << " " << endl;
 
         if (!dart.empty())
             file << "dart\n";
@@ -1169,11 +1182,7 @@ void gameSaver(const int n, const GameData &gameData, vector<Bullet> &bullets, c
         {
             file << bullet.coordinate[0][0] << " " << bullet.coordinate[0][1] << " ";
         }
-        file << "\n";
-        file << Dart.killed << " ";
-        file << Striker.killed << " ";
-        file << Wraith.killed << " ";
-        file << Banshee.killed << " ";
+        
         file.close();
     }
     else
@@ -1202,6 +1211,12 @@ int gameLoader(int &n, GameData &gameData, vector<Bullet> &bullets,
         else if (gameData.gameResult == "undefined")
         {
             file >> n >> gameData.level >> gameData.point >> spaceship.ship_y >> spaceship.heal >> gameData.killCounter >> gameData.targetScore >> spaceship.shape;
+
+            file >> Dart_st.killed;
+            file >> Striker_st.killed;
+            file >> Wraith_st.killed;
+            file >> Banshee_st.killed;
+
             string enemyType;
             file >> enemyType;
 
@@ -1249,10 +1264,6 @@ int gameLoader(int &n, GameData &gameData, vector<Bullet> &bullets,
             {
                 bullets.push_back(newBullet);
             }
-            file >> Dart_st.killed;
-            file >> Striker_st.killed;
-            file >> Banshee_st.killed;
-            file >> Wraith_st.killed;
 
             file.close();
         }
@@ -1266,11 +1277,11 @@ int gameLoader(int &n, GameData &gameData, vector<Bullet> &bullets,
     return -1;
 }
 // function to print game summary
-void summary(Dart &Dart, Striker &Striker, Wraith &Wraith, Banshee &Banshee, GameData &gameData)
+void summary(const Dart &Dart_st, const Striker &Striker_st,const Wraith &Wraith_st,const Banshee &Banshee_st, GameData &gameData)
 {
     cout << "total kills  : " << gameData.killCounter << endl
-         << "Darts        : " << Dart.killed << endl
-         << "strikers     : " << Striker.killed << endl
-         << "wraiths      : " << Wraith.killed << endl
-         << "banshees     : " << Banshee.killed << endl;
+         << "Darts        : " << Dart_st.killed << endl
+         << "strikers     : " << Striker_st.killed << endl
+         << "wraiths      : " << Wraith_st.killed << endl
+         << "banshees     : " << Banshee_st.killed << endl;
 }
