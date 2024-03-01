@@ -308,6 +308,14 @@ int startGame(int x)
             cout << "In order to continue : ";
             system("pause");
         }
+        else if (result == -10)
+        {
+            cout << "there is a problem in opening file." << endl;
+            cout << "In order to go to main menu : " ;
+            system("pause");
+            menu(1);
+
+        }
     }
 
     printMap(n, spaceship, darts, strikers, wraiths, banshees, bullets);
@@ -1271,8 +1279,7 @@ int gameLoader(int &n, GameData &gameData, vector<Bullet> &bullets,
     }
     else
     {
-        cerr << "error opening the file";
-        return-10;
+        return -10; //error in opening file.
     }
     return -1;
 }
